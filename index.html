@@ -1,0 +1,6245 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Agriculture AI - Crop Disease Detection</title>
+  <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary-color: #2ecc71;
+  --secondary-color: #27ae60;
+  --dark-color: #1e3a28;
+  --light-color: #f0f9f4;
+  --text-color: #333;
+  --border-color: #ddd;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+  background-color: #fff;
+  overflow-x: hidden;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Add scroll margin to all sections for sticky navbar */
+section[id] {
+  scroll-margin-top: 80px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Navigation */
+.navbar {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  z-index: 101;
+}
+
+.logo i {
+  font-size: 1.8rem;
+}
+
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 0.4rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 101;
+}
+
+.mobile-menu-toggle span {
+  width: 25px;
+  height: 3px;
+  background: var(--primary-color);
+  border-radius: 3px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.mobile-menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+  background: var(--secondary-color);
+}
+
+.mobile-menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.mobile-menu-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+  background: var(--secondary-color);
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.nav-link {
+  color: var(--text-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  padding: 0.5rem 0;
+  white-space: nowrap;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 2px;
+  box-shadow: 0 0 0 rgba(46, 204, 113, 0);
+}
+
+.nav-link:not(.active):hover::after {
+  width: 100%;
+  opacity: 0.5;
+}
+
+.nav-link.active::after {
+  width: 100% !important;
+  opacity: 1 !important;
+  box-shadow: 0 2px 12px rgba(46, 204, 113, 0.5);
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 2px 12px rgba(46, 204, 113, 0.5);
+  }
+  to {
+    box-shadow: 0 2px 16px rgba(46, 204, 113, 0.7);
+  }
+}
+
+.nav-link:not(.active):hover {
+  color: var(--primary-color);
+  transform: translateY(-1px);
+  opacity: 0.8;
+}
+
+.nav-link.active {
+  color: var(--primary-color) !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(46, 204, 113, 0.15);
+  transform: translateY(-1px);
+  pointer-events: auto;
+}
+
+/* Navbar Weather Widget */
+.nav-weather-widget {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.1), rgba(39, 174, 96, 0.05));
+  border-radius: 20px;
+  border: 1.5px solid rgba(46, 204, 113, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-right: 1rem;
+}
+
+.nav-weather-widget:hover {
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(39, 174, 96, 0.08));
+  border-color: rgba(46, 204, 113, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+}
+
+.nav-weather-icon {
+  font-size: 1.3rem;
+  color: var(--primary-color);
+}
+
+.nav-weather-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  line-height: 1;
+}
+
+.nav-weather-temp {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--dark-color);
+}
+
+.nav-weather-location {
+  font-size: 0.65rem;
+  color: #666;
+  font-weight: 500;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Advanced Language Selector */
+.language-selector {
+  position: relative;
+}
+
+.language-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border: 2px solid var(--border-color);
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.language-btn:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+  transform: translateY(-2px);
+}
+
+.language-btn.active {
+  border-color: var(--primary-color);
+  background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+}
+
+.language-flag {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.language-name {
+  color: var(--dark-color);
+  font-weight: 500;
+}
+
+.language-btn i {
+  font-size: 0.8rem;
+  color: #666;
+  transition: transform 0.3s ease;
+}
+
+.language-btn.active i {
+  transform: rotate(180deg);
+}
+
+.language-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: 280px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.language-dropdown.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.language-search {
+  position: relative;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: #f8f9fa;
+}
+
+.language-search i {
+  position: absolute;
+  left: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.language-search input {
+  width: 100%;
+  padding: 0.6rem 0.8rem 0.6rem 2.5rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.language-search input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.language-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+.language-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.language-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.language-list::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 3px;
+}
+
+.language-list::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-color);
+}
+
+.language-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.language-item:hover {
+  background: linear-gradient(90deg, rgba(76, 175, 80, 0.08), rgba(76, 175, 80, 0.03));
+  padding-left: 1.3rem;
+}
+
+.language-item.active {
+  background: linear-gradient(90deg, rgba(76, 175, 80, 0.15), rgba(76, 175, 80, 0.05));
+  border-left: 3px solid var(--primary-color);
+}
+
+.lang-flag {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.lang-name {
+  flex: 1;
+  color: var(--dark-color);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.language-item i {
+  color: var(--primary-color);
+  font-size: 0.9rem;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.language-item.active i {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.language-item.hidden {
+  display: none;
+}
+
+/* Language Change Notification */
+.language-notification {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 50px;
+  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-weight: 500;
+  z-index: 10000;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.language-notification.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.language-notification i {
+  font-size: 1.2rem;
+}
+
+.language-notification strong {
+  font-weight: 600;
+}
+/* Hero Section */
+.hero {
+  background: url('Lucid_Origin__prompt_A_vibrant_Indian_rice_farming_landscape_d_2.jpg') center/cover no-repeat;
+  color: #fff;
+  padding: 100px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 500px;
+  position: relative;
+  background-attachment: scroll;
+}
+
+/* Add subtle text shadow for better readability */
+.hero-title,
+.hero-subtitle {
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.hero-content {
+  max-width: 600px;
+}
+
+.hero-title {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  animation: fadeInUp 0.8s ease;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  opacity: 0.95;
+  animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 1rem 2rem;
+  background: var(--primary-color);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 50px;
+  font-weight: bold;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.cta-button:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  background: var(--secondary-color);
+}
+
+.cta-button:active {
+  transform: translateY(-1px) scale(1.02);
+  transition: all 0.1s ease;
+}
+
+.hero-image {
+  font-size: 15rem;
+  opacity: 0.2;
+}
+
+/* Weather Section - Compact Full Width */
+.weather-section {
+  padding: 0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.weather-widget {
+  width: 100%;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.weather-compact-container {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Search Section */
+.weather-search-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 2rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.weather-search-input-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 25px;
+  padding: 0 1rem;
+  max-width: 600px;
+}
+
+.weather-search-input-wrapper i {
+  color: #999;
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+}
+
+#weather-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0.6rem 0.5rem;
+  font-size: 0.95rem;
+  outline: none;
+  color: var(--dark-color);
+}
+
+#weather-search-input::placeholder {
+  color: #999;
+}
+
+.weather-search-btn,
+.weather-location-btn,
+.weather-refresh-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.weather-search-btn:hover,
+.weather-location-btn:hover,
+.weather-refresh-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.05);
+}
+
+.weather-refresh-btn.rotating i {
+  animation: spin 1s linear;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Loading State */
+.weather-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  gap: 1rem;
+}
+
+.weather-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.weather-loading p {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Error State */
+.weather-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  gap: 1rem;
+  text-align: center;
+}
+
+.weather-error i {
+  font-size: 1.5rem;
+  color: #ff9800;
+}
+
+.weather-error p {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.weather-retry-btn {
+  padding: 0.5rem 1rem;
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.weather-retry-btn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-1px);
+}
+
+/* Main Weather Content - Compact Horizontal Layout */
+.weather-content {
+  padding: 1rem 2rem;
+}
+
+.weather-main-compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.weather-location-compact {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--dark-color);
+}
+
+.weather-location-compact i {
+  color: var(--primary-color);
+  font-size: 1rem;
+}
+
+.weather-temp-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.weather-icon-compact {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+}
+
+.weather-temp-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.temp-display {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.2rem;
+}
+
+.temp-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--dark-color);
+  line-height: 1;
+}
+
+.temp-unit {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-top: 0.3rem;
+}
+
+.weather-description {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.weather-details-compact {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-left: auto;
+}
+
+.weather-detail-compact {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--dark-color);
+}
+
+.weather-detail-compact i {
+  font-size: 1.1rem;
+  color: var(--primary-color);
+}
+
+/* Agriculture Tips - Collapsible */
+.weather-tips-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 2rem;
+  background: #fffbf0;
+  border-top: 1px solid #ffe9b3;
+  cursor: pointer;
+  font-weight: 600;
+  color: #e67e22;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.weather-tips-toggle:hover {
+  background: #fff4d9;
+}
+
+.weather-tips-toggle i:last-child {
+  transition: transform 0.3s ease;
+}
+
+.weather-tips-toggle.active i:last-child {
+  transform: rotate(180deg);
+}
+
+.weather-agriculture-tips-compact {
+  background: linear-gradient(135deg, #fff8e1, #ffecb3);
+  border-top: 1px solid #ffe9b3;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.agriculture-tips-content {
+  padding: 1rem 2rem;
+  color: #555;
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
+.tip-item {
+  padding: 0.8rem;
+  margin-bottom: 0.6rem;
+  background: #fff;
+  border-radius: 6px;
+  border-left: 3px solid var(--primary-color);
+  line-height: 1.5;
+  font-size: 0.85rem;
+}
+
+.tip-item:last-child {
+  margin-bottom: 0;
+}
+
+.tip-item strong {
+  color: var(--dark-color);
+}
+
+/* 5-Day Forecast Section */
+.weather-forecast-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 2rem;
+  background: #e8f5ff;
+  border-top: 1px solid #b3d9ff;
+  cursor: pointer;
+  font-weight: 600;
+  color: #2196f3;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.weather-forecast-toggle:hover {
+  background: #d4ebff;
+}
+
+.weather-forecast-toggle i:last-child {
+  transition: transform 0.3s ease;
+}
+
+.weather-forecast-toggle.active i:last-child {
+  transform: rotate(180deg);
+}
+
+.weather-forecast-section {
+  background: linear-gradient(135deg, #f0f8ff, #e3f2fd);
+  border-top: 1px solid #b3d9ff;
+  overflow: hidden;
+}
+
+.weather-forecast-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 0.8rem;
+}
+
+.weather-spinner-small {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #2196f3;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.weather-forecast-loading p {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.weather-forecast-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0;
+  padding: 0;
+}
+
+.forecast-day-card {
+  padding: 1rem;
+  background: #fff;
+  border-right: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.forecast-day-card:hover {
+  background: #f8f9fa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.forecast-day-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--dark-color);
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+}
+
+.forecast-date {
+  font-size: 0.75rem;
+  color: #999;
+  margin-bottom: 0.6rem;
+}
+
+.forecast-icon {
+  font-size: 2rem;
+  color: #2196f3;
+  margin: 0.5rem 0;
+}
+
+.forecast-temps {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+  font-weight: 600;
+}
+
+.forecast-temp-high {
+  color: #ff5722;
+  font-size: 1rem;
+}
+
+.forecast-temp-low {
+  color: #2196f3;
+  font-size: 0.9rem;
+}
+
+.forecast-description {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 0.4rem;
+  line-height: 1.3;
+}
+
+.forecast-rain-chance {
+  font-size: 0.7rem;
+  color: #2196f3;
+  margin-top: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.forecast-rain-chance i {
+  font-size: 0.8rem;
+}
+
+/* Detection Section */
+.detection-section {
+  padding: 80px 20px;
+  background: var(--light-color);
+}
+
+.section-title {
+  text-align: center;
+  font-size: 2.5rem;
+  color: var(--dark-color);
+  margin-bottom: 1rem;
+}
+
+.section-subtitle {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 3rem;
+}
+
+.upload-container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Mode Toggle */
+.mode-toggle {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+
+.mode-btn {
+  flex: 1;
+  max-width: 250px;
+  padding: 1rem 2rem;
+  border: 2px solid var(--border-color);
+  background: #fff;
+  color: var(--text-color);
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.mode-btn:hover {
+  border-color: var(--primary-color);
+  background: var(--light-color);
+}
+
+.mode-btn.active {
+  background: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow);
+}
+
+.mode-btn i {
+  font-size: 1.2rem;
+}
+
+.upload-area {
+  background: #fff;
+  border: 3px dashed var(--border-color);
+  border-radius: 15px;
+  padding: 60px 40px;
+  text-align: center;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.upload-area:hover {
+  border-color: var(--primary-color);
+  background: #fafffe;
+}
+
+.upload-area.drag-over {
+  border-color: var(--primary-color);
+  background: #f0f9f4;
+  transform: scale(1.02);
+}
+
+.upload-content h3 {
+  font-size: 1.5rem;
+  margin: 1rem 0 0.5rem;
+  color: var(--dark-color);
+}
+
+.upload-content p {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.upload-icon {
+  font-size: 4rem;
+  color: var(--primary-color);
+}
+
+.upload-btn,
+.camera-btn {
+  padding: 0.8rem 2rem;
+  margin: 0.5rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.upload-btn {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.upload-btn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.camera-btn {
+  background: #3498db;
+  color: #fff;
+}
+
+.camera-btn:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+/* Camera Section */
+.camera-section {
+  width: 100%;
+  text-align: center;
+}
+
+.camera-section video {
+  width: 100%;
+  max-width: 100%;
+  min-height: 300px;
+  height: auto;
+  border-radius: 15px;
+  background: #000;
+  margin-bottom: 1.5rem;
+  object-fit: cover;
+  display: block;
+}
+
+.camera-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.capture-btn,
+.cancel-camera-btn {
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.capture-btn {
+  background: var(--primary-color);
+  color: #fff;
+  flex: 1;
+  max-width: 250px;
+  justify-content: center;
+}
+
+.capture-btn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.cancel-camera-btn {
+  background: #e74c3c;
+  color: #fff;
+  padding: 1rem 1.5rem;
+}
+
+.cancel-camera-btn:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.preview-container {
+  margin: 2rem 0;
+  position: relative;
+  text-align: center;
+}
+
+.preview-container img {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 15px;
+  box-shadow: var(--shadow-lg);
+}
+
+.remove-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.remove-btn:hover {
+  background: #c0392b;
+  transform: scale(1.1);
+}
+
+.analyze-btn {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  margin: 2rem 0;
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.analyze-btn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Loading Spinner */
+.loading {
+  text-align: center;
+  padding: 3rem;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid var(--border-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  animation: spin 1s linear infinite;
+}
+
+.loading p {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+/* Results Section */
+.results-container {
+  margin-top: 3rem;
+}
+
+.result-card {
+  background: #fff;
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: var(--shadow-lg);
+  animation: fadeInUp 0.5s ease;
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.result-header i {
+  font-size: 2rem;
+  color: var(--primary-color);
+}
+
+.result-header h3 {
+  font-size: 1.8rem;
+  color: var(--dark-color);
+}
+
+.result-content > div {
+  margin-bottom: 2rem;
+}
+
+.result-content h4 {
+  font-size: 1.2rem;
+  color: var(--dark-color);
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.disease-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  padding: 1rem;
+  background: var(--light-color);
+}
+
+.confidence-info {
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 2px solid #4caf50;
+}
+
+.confidence-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.confidence-bar-container {
+  position: relative;
+}
+
+.confidence-bar {
+  width: 100%;
+  height: 40px;
+  background: #e0e0e0;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.confidence-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #8bc34a);
+  transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px;
+  box-shadow: 0 2px 10px rgba(76, 175, 80, 0.4);
+  position: relative;
+}
+
+.confidence-percentage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  z-index: 2;
+}
+
+.confidence-description {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.confidence-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--dark-color);
+  margin: 0;
+}
+
+.confidence-reliability {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+  padding: 0.8rem;
+  background: #fff;
+  border-radius: 8px;
+  border-left: 4px solid #2196f3;
+}
+
+.solution-text,
+.prevention-text {
+  background: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 10px;
+  border-left: 4px solid var(--primary-color);
+  line-height: 1.8;
+}
+
+.solution-text ul,
+.prevention-text ul {
+  margin-left: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.solution-text li,
+.prevention-text li {
+  margin-bottom: 0.5rem;
+}
+
+/* Info Sections */
+.info-section {
+  margin-bottom: 1.5rem;
+}
+
+.info-section h4 {
+  font-size: 1.1rem;
+  color: var(--dark-color);
+  margin-bottom: 0.5rem;
+}
+
+.info-section p {
+  background: #f9f9f9;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 3px solid var(--primary-color);
+}
+
+.info-section ul {
+  background: #f9f9f9;
+  padding: 1rem 1rem 1rem 2rem;
+  border-radius: 8px;
+  border-left: 3px solid var(--primary-color);
+  list-style: disc;
+}
+
+.info-section ul li {
+  margin-bottom: 0.5rem;
+}
+
+/* AI Tips Section */
+.ai-tips-section {
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+  padding: 1.5rem;
+  border-radius: 10px;
+  border: 2px solid var(--primary-color);
+  margin-top: 1.5rem;
+}
+
+/* Result Chat Section */
+.result-chat-section {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  padding: 1.5rem;
+  border-radius: 10px;
+  border: 2px solid #ff9800;
+  margin-top: 2rem;
+}
+
+.result-chat-section h4 {
+  color: var(--dark-color);
+  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+}
+
+.chat-helper-text {
+  color: #666;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.result-chat-messages {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1rem;
+  min-height: 100px;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.result-chat-messages:empty::before {
+  content: "No questions asked yet. Type your question below to get AI assistance!";
+  color: #999;
+  font-style: italic;
+  display: block;
+  text-align: center;
+  padding: 2rem;
+}
+
+.result-chat-input-container {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-end;
+}
+
+#result-chat-input {
+  flex: 1;
+  padding: 0.8rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: none;
+  transition: border-color 0.3s;
+  min-height: 50px;
+}
+
+#result-chat-input:focus {
+  outline: none;
+  border-color: #ff9800;
+}
+
+.result-chat-send-btn {
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ff9800, #ffa726);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.result-chat-send-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+}
+
+.result-chat-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.result-chat-send-btn i {
+  font-size: 1rem;
+}
+
+.ai-tips-section h4 {
+  color: var(--dark-color);
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.ai-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.ai-tip-item {
+  background: #fff;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.ai-tip-item::before {
+  content: "💡";
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* Severity Badge */
+.severity-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.severity-mild {
+  background: #d4edda;
+  color: #155724;
+}
+
+.severity-moderate {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.severity-critical {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Health Status Badge */
+.health-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.health-healthy {
+  background: #d4edda;
+  color: #155724;
+}
+
+.health-stressed {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.health-diseased {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Pesticides Section */
+.pesticides-section {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  border: 2px solid #2196f3;
+}
+
+.pesticides-section h4 {
+  color: var(--dark-color);
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.pesticide-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.pesticide-tab {
+  flex: 1;
+  padding: 1rem;
+  border: 2px solid #ddd;
+  background: #fff;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.pesticide-tab:hover {
+  border-color: #2196f3;
+  transform: translateY(-2px);
+}
+
+.pesticide-tab.active {
+  background: linear-gradient(135deg, #2196f3, #1976d2);
+  color: #fff;
+  border-color: #1976d2;
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+}
+
+.pesticide-content {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.pesticide-item {
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border-left: 4px solid #2196f3;
+}
+
+.pesticide-item:last-child {
+  margin-bottom: 0;
+}
+
+.pesticide-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--dark-color);
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pesticide-name::before {
+  content: "💊";
+  font-size: 1.3rem;
+}
+
+.pesticide-info {
+  margin-bottom: 1rem;
+}
+
+.pesticide-info h5 {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.pesticide-info p,
+.pesticide-info ul {
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.pesticide-info ul {
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.pesticide-info ul li {
+  margin-bottom: 0.5rem;
+}
+
+.application-method {
+  background: #e8f5e9;
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 3px solid #4caf50;
+  margin-top: 0.8rem;
+}
+
+.application-method h5 {
+  color: #2e7d32;
+  margin-bottom: 0.5rem;
+}
+
+.dosage-info {
+  background: #fff3e0;
+  padding: 0.8rem;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+  font-weight: 600;
+  color: #e65100;
+}
+
+.safety-warning {
+  background: #ffebee;
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 3px solid #f44336;
+  margin-top: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.safety-warning::before {
+  content: "⚠️";
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.safety-warning p {
+  margin: 0;
+  color: #c62828;
+  font-weight: 500;
+}
+
+/* Chat Floating Button */
+.chat-float-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.3rem;
+  transition: all 0.3s ease;
+  z-index: 999;
+  animation: floatPulse 3s ease-in-out infinite;
+}
+
+@keyframes floatPulse {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(76, 175, 80, 0.6);
+  }
+}
+
+.chat-float-btn::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  opacity: 0.5;
+  animation: ripple 2s infinite;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+.chat-float-btn:hover {
+  transform: scale(1.15) rotate(5deg);
+  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.6);
+  animation: none;
+}
+
+.chat-float-btn i {
+  font-size: 1.8rem;
+  z-index: 1;
+  animation: iconBounce 2s ease-in-out infinite;
+}
+
+@keyframes iconBounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.chat-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  z-index: 1;
+}
+
+/* Chat Container */
+.chat-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 400px;
+  height: 600px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  display: none;
+  flex-direction: column;
+  z-index: 1000;
+  overflow: hidden;
+  animation: slideUp 0.3s ease-out;
+}
+
+.chat-container.active {
+  display: flex;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-header {
+  background: linear-gradient(135deg, #2e7d32, #4caf50);
+  color: #fff;
+  padding: 1.2rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.chat-header-content {
+  flex: 1;
+}
+
+.chat-avatar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.chat-avatar {
+  position: relative;
+  width: 45px;
+  height: 45px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.status-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  background: #4caf50;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(76, 175, 80, 0);
+  }
+}
+
+.chat-header-info h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.chat-status {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  display: block;
+  margin-top: 0.2rem;
+}
+
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chat-action-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.chat-action-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.1);
+}
+
+.chat-toggle-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.chat-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: rotate(90deg) scale(1.1);
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Chat Welcome Screen */
+.chat-welcome {
+  text-align: center;
+  padding: 2rem 1rem;
+  animation: fadeInUp 0.5s ease;
+}
+
+.welcome-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.chat-welcome h4 {
+  color: var(--dark-color);
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
+}
+
+.chat-welcome > p {
+  color: #666;
+  margin: 0 0 2rem 0;
+}
+
+.quick-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+.quick-title {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  text-align: left;
+}
+
+.quick-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 1.2rem;
+  background: #fff;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  font-size: 0.95rem;
+  color: var(--dark-color);
+  font-weight: 500;
+}
+
+.quick-btn:hover {
+  border-color: var(--primary-color);
+  background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+  transform: translateX(5px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
+.quick-btn i {
+  color: var(--primary-color);
+  font-size: 1.1rem;
+}
+
+.chat-message {
+  display: flex;
+  gap: 0.8rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.bot-message .message-avatar {
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+}
+
+.user-message .message-avatar {
+  background: linear-gradient(135deg, #2196f3, #42a5f5);
+}
+
+.message-content {
+  flex: 1;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.message-content p {
+  margin: 0 0 0.5rem 0;
+  line-height: 1.6;
+}
+
+.message-content p:last-child {
+  margin-bottom: 0;
+}
+
+.message-content ul {
+  margin: 0.5rem 0 0 0;
+  padding-left: 1.5rem;
+}
+
+.message-content li {
+  margin-bottom: 0.3rem;
+}
+
+.message-time {
+  font-size: 0.75rem;
+  color: #999;
+  margin-top: 0.3rem;
+  display: block;
+}
+
+.user-message {
+  flex-direction: row-reverse;
+}
+
+.user-message .message-content {
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+}
+
+.message-loading {
+  display: flex;
+  gap: 0.3rem;
+  padding: 0.5rem 0;
+}
+
+.message-loading span {
+  width: 8px;
+  height: 8px;
+  background: #4caf50;
+  border-radius: 50%;
+  animation: bounce 1.4s infinite ease-in-out;
+}
+
+.message-loading span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.message-loading span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* Chat Suggestions Bar */
+.chat-suggestions {
+  padding: 0.8rem 1rem;
+  background: #fff;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chat-suggestions::-webkit-scrollbar {
+  display: none;
+}
+
+.suggestion-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+  border: 1px solid var(--primary-color);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--dark-color);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.suggestion-btn:hover {
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.suggestion-btn i {
+  font-size: 0.9rem;
+}
+
+.chat-input-container {
+  padding: 1rem;
+  background: #fff;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.8rem;
+}
+
+.chat-attach-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.chat-attach-btn:hover {
+  background: var(--primary-color);
+  color: #fff;
+  transform: rotate(45deg);
+}
+
+#chat-input {
+  flex: 1;
+  padding: 0.8rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: none;
+  transition: border-color 0.3s;
+}
+
+#chat-input:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+.chat-send-btn {
+  width: 45px;
+  height: 45px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.chat-send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.chat-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chat-send-btn i {
+  font-size: 1.1rem;
+}
+
+/* English Translation Highlighting */
+.result-content p,
+.result-content li,
+.pesticide-info p,
+.pesticide-info li {
+  word-wrap: break-word;
+}
+
+/* Style for English translations in parentheses */
+.result-content :is(p, li, div):not(.disease-name):not(.confidence-text) {
+  line-height: 1.8;
+}
+
+/* Make parenthetical English translations slightly smaller and different color */
+.info-section p::after,
+.solution-text::after,
+.prevention-text::after,
+.pesticide-info p::after {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.new-scan-btn {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  margin-top: 2rem;
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.new-scan-btn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+/* About Section */
+.about-section {
+  padding: 80px 20px;
+  background: #fff;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.about-card {
+  text-align: center;
+  padding: 2rem;
+  background: var(--light-color);
+  border-radius: 15px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.about-card:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-lg);
+}
+
+.about-card i {
+  font-size: 3rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.about-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--dark-color);
+}
+
+.about-card p {
+  color: #666;
+  line-height: 1.6;
+}
+
+/* Features Section */
+.features-section {
+  padding: 80px 20px;
+  background: var(--light-color);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.feature-item {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+  transition: transform 0.3s;
+}
+
+.feature-item:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.feature-item i {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.feature-item h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.8rem;
+  color: var(--dark-color);
+}
+
+.feature-item p {
+  color: #666;
+  line-height: 1.6;
+}
+
+/* Footer */
+.footer {
+  background: var(--dark-color);
+  color: #fff;
+  padding: 3rem 20px 1rem;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.footer-section h3,
+.footer-section h4 {
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+.footer-section p {
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.footer-section p a {
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.footer-section p a:hover {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.footer-section ul {
+  list-style: none;
+}
+
+.footer-section ul li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-section ul li a {
+  color: #fff;
+  text-decoration: none;
+  opacity: 0.9;
+  transition: opacity 0.3s;
+}
+
+.footer-section ul li a:hover {
+  opacity: 1;
+  color: var(--primary-color);
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 0.8;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mobile Menu Backdrop */
+.nav-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 99;
+}
+
+.nav-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Bottom Navigation Bar (Mobile) */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 0.5rem 0;
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  z-index: 1000;
+  box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.08);
+}
+
+.bottom-nav-container {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: flex-start;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0.3rem 0.5rem 0;
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.25rem;
+  text-decoration: none;
+  color: #888;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0.3rem 0.5rem;
+  border-radius: 12px;
+  position: relative;
+  flex: 1;
+  max-width: 80px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav-item .nav-icon {
+  font-size: 1.5rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.bottom-nav-item .nav-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.bottom-nav-item:active {
+  transform: scale(0.92);
+}
+
+.bottom-nav-item.active .nav-icon {
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+  transform: translateY(-10px);
+}
+
+.bottom-nav-item.active .nav-label {
+  color: var(--primary-color);
+  font-weight: 700;
+  transform: translateY(-2px);
+}
+
+/* Home indicator line */
+.bottom-nav::after {
+  content: '';
+  position: absolute;
+  bottom: max(0.25rem, env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: 35%;
+  max-width: 140px;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 100px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  /* Show bottom navigation, hide hamburger */
+  .mobile-menu-toggle {
+    display: none;
+  }
+  
+  .bottom-nav {
+    display: block;
+  }
+  
+  /* Add bottom padding to body for bottom nav */
+  body {
+    padding-bottom: 85px;
+  }
+  
+  /* Adjust sections for bottom nav */
+  section {
+    margin-bottom: 0;
+  }
+
+  .nav-container {
+    padding: 0.8rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  /* Keep navbar visible on mobile */
+  .nav-menu {
+    display: flex;
+    position: static;
+    width: auto;
+    height: auto;
+    background: transparent;
+    backdrop-filter: none;
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+    gap: 0;
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Hide desktop nav links - only show weather widget and language */
+  .nav-links {
+    display: none;
+  }
+  
+  /* Mobile Weather Widget - Keep compact in navbar */
+  .nav-weather-widget {
+    width: auto;
+    margin: 0 0.5rem 0 auto;
+    padding: 0.3rem 0.7rem;
+    justify-content: center;
+    border-radius: 15px;
+    order: 1;
+  }
+  
+  .nav-weather-icon {
+    font-size: 1.2rem;
+  }
+  
+  .nav-weather-temp {
+    font-size: 0.85rem;
+  }
+  
+  .nav-weather-location {
+    max-width: 80px;
+    font-size: 0.6rem;
+  }
+
+  .language-selector {
+    width: auto;
+    margin: 0 0.5rem 0 0;
+    opacity: 1;
+    transform: none;
+    order: 2;
+  }
+
+  .language-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  
+  .language-flag {
+    font-size: 1rem;
+  }
+  
+  .language-name {
+    display: none; /* Hide language name on mobile to save space */
+  }
+  
+  .language-dropdown {
+    width: 200px;
+    right: 0;
+    left: auto;
+  }
+  
+  .language-notification {
+    bottom: 90px; /* Above bottom nav */
+    left: 1rem;
+    right: 1rem;
+    transform: translateX(0) translateY(100px);
+  }
+  
+  .language-notification.show {
+    transform: translateX(0) translateY(0);
+  }
+
+  .logo {
+    font-size: 1.1rem;
+  }
+  
+  .logo i {
+    font-size: 1.3rem;
+  }
+  
+  .logo span {
+    font-size: 0.95rem;
+  }
+
+  .hero {
+    flex-direction: column;
+    padding: 60px 20px;
+    text-align: center;
+    background: url('Lucid_Origin__prompt_A_vibrant_Indian_rice_farming_landscape_d_2 (1).jpg') center/cover no-repeat;
+    background-attachment: scroll;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .hero-image {
+    font-size: 8rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .upload-area {
+    padding: 40px 20px;
+  }
+
+  .mode-toggle {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mode-btn {
+    max-width: 100%;
+  }
+
+  .camera-controls {
+    flex-direction: column;
+  }
+
+  .capture-btn,
+  .cancel-camera-btn {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .pesticide-tabs {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .pesticide-tab {
+    width: 100%;
+  }
+  
+  .chat-container {
+    width: 100%;
+    height: calc(100vh - 85px); /* Account for bottom nav */
+    bottom: 85px; /* Position above bottom nav */
+    right: 0;
+    border-radius: 0;
+    max-height: calc(100vh - 85px);
+  }
+
+  .chat-float-btn {
+    width: auto;
+    height: 60px;
+    padding: 0.8rem 1.2rem;
+    bottom: 95px; /* Position above bottom nav bar */
+    right: 1rem;
+    z-index: 999; /* Below bottom nav but above other content */
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .chat-float-btn i {
+    font-size: 1.3rem;
+  }
+  
+  .chat-badge {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .result-chat-input-container {
+    flex-direction: column;
+  }
+
+  .result-chat-send-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .result-chat-messages {
+    max-height: 300px;
+  }
+
+  /* Weather Section Responsive */
+  .weather-search-section {
+    padding: 0.6rem 1rem;
+    flex-wrap: wrap;
+  }
+
+  .weather-search-input-wrapper {
+    max-width: 100%;
+    order: 1;
+    flex: 1 1 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  #weather-search-input {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+
+  .weather-search-btn,
+  .weather-location-btn,
+  .weather-refresh-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 0.85rem;
+  }
+
+  .weather-content {
+    padding: 0.8rem 1rem;
+  }
+
+  .weather-main-compact {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .weather-location-compact {
+    font-size: 0.85rem;
+  }
+
+  .weather-temp-section {
+    gap: 0.8rem;
+  }
+
+  .weather-icon-compact {
+    font-size: 2rem;
+  }
+
+  .temp-value {
+    font-size: 2rem;
+  }
+
+  .temp-unit {
+    font-size: 1rem;
+  }
+
+  .weather-description {
+    font-size: 0.8rem;
+  }
+
+  .weather-details-compact {
+    flex-wrap: wrap;
+    margin-left: 0;
+    gap: 1rem;
+  }
+
+  .weather-detail-compact {
+    font-size: 0.85rem;
+  }
+
+  .weather-tips-toggle {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .agriculture-tips-content {
+    padding: 0.8rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .tip-item {
+    padding: 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .weather-forecast-toggle {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .weather-forecast-container {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+
+  .forecast-day-card {
+    padding: 0.8rem 0.5rem;
+  }
+
+  .forecast-day-name {
+    font-size: 0.75rem;
+  }
+
+  .forecast-date {
+    font-size: 0.7rem;
+  }
+
+  .forecast-icon {
+    font-size: 1.5rem;
+  }
+
+  .forecast-temp-high {
+    font-size: 0.9rem;
+  }
+
+  .forecast-temp-low {
+    font-size: 0.8rem;
+  }
+
+  .forecast-description {
+    font-size: 0.7rem;
+  }
+
+  .about-grid,
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
+
+</style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <!-- Mobile Menu Backdrop -->
+  <div class="nav-backdrop" id="nav-backdrop"></div>
+  
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <i class="fas fa-leaf"></i>
+        <span>Smart Agriculture AI</span>
+      </div>
+      <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="nav-menu" id="nav-menu">
+        <div class="nav-links">
+          <a href="#home" class="nav-link">Home</a>
+          <a href="#weather" class="nav-link">Weather</a>
+          <a href="#detect" class="nav-link">Detect Disease</a>
+          <a href="#about" class="nav-link">About</a>
+          <a href="#features" class="nav-link">Features</a>
+        </div>
+        <div class="nav-weather-widget" id="nav-weather-widget">
+          <div class="nav-weather-icon" id="nav-weather-icon">
+            <i class="fas fa-cloud-sun"></i>
+          </div>
+          <div class="nav-weather-info">
+            <div class="nav-weather-temp" id="nav-weather-temp">--°</div>
+            <div class="nav-weather-location" id="nav-weather-location">Loading...</div>
+          </div>
+        </div>
+        <div class="language-selector">
+          <button class="language-btn" id="language-btn">
+            <span class="language-flag">🇬🇧</span>
+            <span class="language-name">English</span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="language-dropdown" id="language-dropdown">
+            <div class="language-search">
+              <i class="fas fa-search"></i>
+              <input type="text" id="language-search" placeholder="Search language...">
+            </div>
+            <div class="language-list" id="language-list">
+              <div class="language-item active" data-lang="en" data-flag="🇬🇧" data-name="English">
+                <span class="lang-flag">🇬🇧</span>
+                <span class="lang-name">English</span>
+                <i class="fas fa-check"></i>
+              </div>
+              <div class="language-item" data-lang="hi" data-flag="🇮🇳" data-name="हिंदी">
+                <span class="lang-flag">🇮🇳</span>
+                <span class="lang-name">हिंदी (Hindi)</span>
+                <i class="fas fa-check"></i>
+              </div>
+              <div class="language-item" data-lang="bn" data-flag="🇧🇩" data-name="বাংলা">
+                <span class="lang-flag">🇧🇩</span>
+                <span class="lang-name">বাংলা (Bengali)</span>
+                <i class="fas fa-check"></i>
+              </div>
+              <div class="language-item" data-lang="te" data-flag="🇮🇳" data-name="తెలుగు">
+                <span class="lang-flag">🇮🇳</span>
+                <span class="lang-name">తెలుగు (Telugu)</span>
+                <i class="fas fa-check"></i>
+              </div>
+              <div class="language-item" data-lang="mr" data-flag="🇮🇳" data-name="मराठी">
+                <span class="lang-flag">🇮🇳</span>
+                <span class="lang-name">मराठी (Marathi)</span>
+                <i class="fas fa-check"></i>
+              </div>
+              <div class="language-item" data-lang="ta" data-flag="🇮🇳" data-name="தமிழ்">
+                <span class="lang-flag">🇮🇳</span>
+                <span class="lang-name">தமிழ் (Tamil)</span>
+                <i class="fas fa-check"></i>
+              </div>
+              <div class="language-item" data-lang="gu" data-flag="🇮🇳" data-name="ગુજરાતી">
+                <span class="lang-flag">🇮🇳</span>
+                <span class="lang-name">ગુજરાતી (Gujarati)</span>
+                <i class="fas fa-check"></i>
+              </div>
+              <div class="language-item" data-lang="kn" data-flag="🇮🇳" data-name="ಕನ್ನಡ">
+                <span class="lang-flag">🇮🇳</span>
+                <span class="lang-name">ಕನ್ನಡ (Kannada)</span>
+                <i class="fas fa-check"></i>
+              </div>
+              <div class="language-item" data-lang="ml" data-flag="🇮🇳" data-name="മലയാളം">
+                <span class="lang-flag">🇮🇳</span>
+                <span class="lang-name">മലയാളം (Malayalam)</span>
+                <i class="fas fa-check"></i>
+              </div>
+              <div class="language-item" data-lang="pa" data-flag="🇮🇳" data-name="ਪੰਜਾਬੀ">
+                <span class="lang-flag">🇮🇳</span>
+                <span class="lang-name">ਪੰਜਾਬੀ (Punjabi)</span>
+                <i class="fas fa-check"></i>
+              </div>
+              <div class="language-item" data-lang="or" data-flag="🇮🇳" data-name="ଓଡ଼ିଆ">
+                <span class="lang-flag">🇮🇳</span>
+                <span class="lang-name">ଓଡ଼ିଆ (Odia)</span>
+                <i class="fas fa-check"></i>
+              </div>
+              <div class="language-item" data-lang="as" data-flag="🇮🇳" data-name="অসমীয়া">
+                <span class="lang-flag">🇮🇳</span>
+                <span class="lang-name">অসমীয়া (Assamese)</span>
+                <i class="fas fa-check"></i>
+              </div>
+              <div class="language-item" data-lang="ur" data-flag="🇵🇰" data-name="اردو">
+                <span class="lang-flag">🇵🇰</span>
+                <span class="lang-name">اردو (Urdu)</span>
+                <i class="fas fa-check"></i>
+              </div>
+              <div class="language-item" data-lang="sa" data-flag="🇮🇳" data-name="संस्कृत">
+                <span class="lang-flag">🇮🇳</span>
+                <span class="lang-name">संस्कृत (Sanskrit)</span>
+                <i class="fas fa-check"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Bottom Navigation (Mobile) -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <div class="bottom-nav-container">
+      <a href="#home" class="bottom-nav-item" data-section="home">
+        <div class="nav-icon">
+          <i class="fas fa-home"></i>
+        </div>
+        <span class="nav-label">Home</span>
+      </a>
+      <a href="#weather" class="bottom-nav-item" data-section="weather">
+        <div class="nav-icon">
+          <i class="fas fa-cloud-sun"></i>
+        </div>
+        <span class="nav-label">Weather</span>
+      </a>
+      <a href="#detect" class="bottom-nav-item" data-section="detect">
+        <div class="nav-icon">
+          <i class="fas fa-search-plus"></i>
+        </div>
+        <span class="nav-label">Detect</span>
+      </a>
+      <a href="#about" class="bottom-nav-item" data-section="about">
+        <div class="nav-icon">
+          <i class="fas fa-info-circle"></i>
+        </div>
+        <span class="nav-label">About</span>
+      </a>
+      <a href="#features" class="bottom-nav-item" data-section="features">
+        <div class="nav-icon">
+          <i class="fas fa-star"></i>
+        </div>
+        <span class="nav-label">Features</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="home" class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">Protect Your Crops with AI</h1>
+      <p class="hero-subtitle">Upload a leaf image and get instant disease detection with treatment recommendations</p>
+      <a href="#detect" class="cta-button">
+        <i class="fas fa-camera"></i> Start Detection
+      </a>
+    </div>
+    <div class="hero-image">
+      <i class="fas fa-seedling"></i>
+    </div>
+  </section>
+
+  <!-- Weather Information Section -->
+  <section id="weather" class="weather-section">
+    <div class="weather-widget" id="weather-widget">
+      <div class="weather-compact-container">
+        <!-- Search and Controls -->
+        <div class="weather-search-section">
+          <div class="weather-search-input-wrapper">
+            <i class="fas fa-search"></i>
+            <input 
+              type="text" 
+              id="weather-search-input" 
+              placeholder="Search city (e.g., New York, Mumbai, London...)"
+              autocomplete="off"
+            />
+            <button class="weather-search-btn" id="weather-search-btn" title="Search">
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+          <button class="weather-location-btn" id="weather-location-btn" title="Use my location">
+            <i class="fas fa-location-arrow"></i>
+          </button>
+          <button class="weather-refresh-btn" id="weather-refresh-btn" title="Refresh weather">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+        
+        <div class="weather-loading" id="weather-loading">
+          <div class="weather-spinner"></div>
+          <p>Getting weather...</p>
+        </div>
+        
+        <div class="weather-error" id="weather-error" style="display: none;">
+          <i class="fas fa-exclamation-triangle"></i>
+          <p id="weather-error-message">Unable to load weather data</p>
+          <button class="weather-retry-btn" id="weather-retry-btn">Retry</button>
+        </div>
+        
+        <div class="weather-content" id="weather-content" style="display: none;">
+          <!-- Main Weather Display -->
+          <div class="weather-main-compact">
+            <div class="weather-location-compact">
+              <i class="fas fa-map-marker-alt"></i>
+              <span id="weather-location-name">Loading...</span>
+            </div>
+            
+            <div class="weather-temp-section">
+              <div class="weather-icon-compact" id="weather-icon">
+                <i class="fas fa-cloud"></i>
+              </div>
+              <div class="weather-temp-info">
+                <div class="temp-display">
+                  <span class="temp-value" id="weather-temp">--</span>
+                  <span class="temp-unit">°C</span>
+                </div>
+                <p class="weather-description" id="weather-description">--</p>
+              </div>
+            </div>
+            
+            <div class="weather-details-compact">
+              <div class="weather-detail-compact">
+                <i class="fas fa-tint"></i>
+                <span id="weather-humidity">--%</span>
+              </div>
+              <div class="weather-detail-compact">
+                <i class="fas fa-wind"></i>
+                <span id="weather-wind">--</span>
+              </div>
+              <div class="weather-detail-compact">
+                <i class="fas fa-thermometer-half"></i>
+                <span id="weather-feels-like">--°C</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Collapsible Agriculture Tips -->
+          <div class="weather-tips-toggle" id="weather-tips-toggle">
+            <i class="fas fa-lightbulb"></i> Farming Tips
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="weather-agriculture-tips-compact" id="weather-agriculture-tips" style="display: none;">
+            <div class="agriculture-tips-content" id="agriculture-tips-content">
+              <p>Based on current conditions...</p>
+            </div>
+          </div>
+          
+          <!-- 5-Day Forecast Toggle -->
+          <div class="weather-forecast-toggle" id="weather-forecast-toggle">
+            <i class="fas fa-calendar-week"></i> 5-Day Forecast
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="weather-forecast-section" id="weather-forecast-section" style="display: none;">
+            <div class="weather-forecast-loading" id="weather-forecast-loading">
+              <div class="weather-spinner-small"></div>
+              <p>Loading forecast...</p>
+            </div>
+            <div class="weather-forecast-container" id="weather-forecast-container">
+              <!-- Forecast days will be inserted here dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Disease Detection Section -->
+  <section id="detect" class="detection-section">
+    <div class="container">
+      <h2 class="section-title">Crop Disease Detection</h2>
+      <p class="section-subtitle">Upload or capture an image of the affected leaf</p>
+      
+      <div class="upload-container">
+        <!-- Mode Toggle Buttons -->
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="upload-mode-btn">
+            <i class="fas fa-folder-open"></i> Choose File
+          </button>
+          <button class="mode-btn" id="camera-mode-btn">
+            <i class="fas fa-camera"></i> Take Photo
+          </button>
+        </div>
+
+        <!-- Upload Area -->
+        <div class="upload-area" id="upload-area">
+          <div class="upload-content" id="upload-content">
+            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+            <h3>Drop your image here</h3>
+            <p>or click to browse</p>
+            <input type="file" id="file-input" accept="image/*" hidden />
+            <button class="upload-btn" id="upload-btn">
+              <i class="fas fa-folder-open"></i> Choose File
+            </button>
+          </div>
+          
+          <!-- Camera Section -->
+          <div class="camera-section" id="camera-section" style="display: none;">
+            <video id="camera-stream" autoplay playsinline></video>
+            <div class="camera-controls">
+              <button class="capture-btn" id="capture-btn">
+                <i class="fas fa-camera"></i> Capture Photo
+              </button>
+              <button class="cancel-camera-btn" id="cancel-camera-btn">
+                <i class="fas fa-times"></i> Cancel
+              </button>
+            </div>
+          </div>
+          <canvas id="canvas" style="display: none;"></canvas>
+        </div>
+
+        <div class="preview-container" id="preview-container" style="display: none;">
+          <img id="preview-image" alt="Preview" />
+          <button class="remove-btn" id="remove-btn">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <button class="analyze-btn" id="analyze-btn" style="display: none;">
+          <i class="fas fa-search"></i> Analyze Image
+        </button>
+
+        <div class="loading" id="loading" style="display: none;">
+          <div class="spinner"></div>
+          <p>Analyzing your image...</p>
+        </div>
+      </div>
+
+      <!-- Results Section -->
+      <div class="results-container" id="results-container" style="display: none;">
+        <div class="result-card">
+          <div class="result-header">
+            <i class="fas fa-check-circle" id="result-icon"></i>
+            <h3 id="result-title">Analysis Results</h3>
+          </div>
+          <div class="result-content">
+            <!-- Main Identification -->
+            <div class="disease-info">
+              <h4 id="main-label">Identified:</h4>
+              <p class="disease-name" id="disease-name"></p>
+            </div>
+            
+            <!-- Confidence Score -->
+            <div class="confidence-info">
+              <h4>🧠 AI Confidence Score:</h4>
+              <div class="confidence-details">
+                <div class="confidence-bar-container">
+                  <div class="confidence-bar">
+                    <div class="confidence-fill" id="confidence-fill"></div>
+                    <span class="confidence-percentage" id="confidence-percentage">0%</span>
+                  </div>
+                </div>
+                <div class="confidence-description">
+                  <p class="confidence-text" id="confidence-text"></p>
+                  <p class="confidence-reliability" id="confidence-reliability"></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic Content Sections -->
+            <div id="crop-details" style="display: none;">
+              <div class="info-section">
+                <h4>🧬 Growth Stage:</h4>
+                <p id="growth-stage"></p>
+              </div>
+              <div class="info-section">
+                <h4>🌡️ Health Status:</h4>
+                <p id="health-status"></p>
+              </div>
+              <div class="info-section">
+                <h4>☀️ Environmental Needs:</h4>
+                <div id="environmental-needs"></div>
+              </div>
+              <div class="info-section">
+                <h4>🌾 Fertilizer Recommendation:</h4>
+                <p id="fertilizer-rec"></p>
+              </div>
+            </div>
+
+            <div id="disease-details" style="display: none;">
+              <div class="info-section">
+                <h4>🧫 Cause & Symptoms:</h4>
+                <p id="cause-symptoms"></p>
+              </div>
+              <div class="info-section">
+                <h4>🕒 Severity Level:</h4>
+                <p id="severity-level"></p>
+              </div>
+              <div class="info-section">
+                <h4>🌱 Affected Crops:</h4>
+                <p id="affected-crops"></p>
+              </div>
+            </div>
+
+            <div id="soil-details" style="display: none;">
+              <div class="info-section">
+                <h4>🧪 Soil Type:</h4>
+                <p id="soil-type"></p>
+              </div>
+              <div class="info-section">
+                <h4>🧫 Nutrient Status:</h4>
+                <div id="nutrient-status"></div>
+              </div>
+              <div class="info-section">
+                <h4>💧 Moisture Content:</h4>
+                <p id="moisture-content"></p>
+              </div>
+              <div class="info-section">
+                <h4>🌾 Suitable Crops:</h4>
+                <p id="crop-suitability"></p>
+              </div>
+            </div>
+
+            <div id="weed-details" style="display: none;">
+              <div class="info-section">
+                <h4>🚜 Removal Methods:</h4>
+                <div id="removal-methods"></div>
+              </div>
+              <div class="info-section">
+                <h4>⚠️ Impact on Crops:</h4>
+                <p id="impact-crops"></p>
+              </div>
+            </div>
+
+            <div id="pest-details" style="display: none;">
+              <div class="info-section">
+                <h4>🔬 Life Cycle:</h4>
+                <p id="life-cycle"></p>
+              </div>
+              <div class="info-section">
+                <h4>📅 Best Treatment Time:</h4>
+                <p id="treatment-time"></p>
+              </div>
+            </div>
+
+            <!-- Pesticides Section -->
+            <div class="pesticides-section" id="pesticides-section" style="display: none;">
+              <h4><i class="fas fa-spray-can"></i> 🧪 Recommended Pesticides & Application:</h4>
+              
+              <div class="pesticide-tabs">
+                <button class="pesticide-tab active" onclick="showPesticideTab('organic')">
+                  🌿 Organic Solutions
+                </button>
+                <button class="pesticide-tab" onclick="showPesticideTab('chemical')">
+                  ⚗️ Chemical Solutions
+                </button>
+              </div>
+
+              <div id="organic-pesticides" class="pesticide-content">
+                <div class="pesticide-details" id="organic-details"></div>
+              </div>
+
+              <div id="chemical-pesticides" class="pesticide-content" style="display: none;">
+                <div class="pesticide-details" id="chemical-details"></div>
+              </div>
+            </div>
+
+            <!-- Treatment & Prevention (Common for all) -->
+            <div class="solution-info">
+              <h4><i class="fas fa-prescription-bottle"></i> Treatment & Remedies:</h4>
+              <div class="solution-text" id="solution-text"></div>
+            </div>
+            <div class="prevention-info">
+              <h4><i class="fas fa-shield-alt"></i> Prevention Measures:</h4>
+              <div class="prevention-text" id="prevention-text"></div>
+            </div>
+
+            <!-- AI Tips -->
+            <div class="ai-tips-section" id="ai-tips-section" style="display: none;">
+              <h4>🧠 AI Tips & Recommendations:</h4>
+              <div class="ai-tips" id="ai-tips"></div>
+            </div>
+
+            <!-- Inline Chat Section -->
+            <div class="result-chat-section">
+              <h4><i class="fas fa-comments"></i> 💬 Ask AI About This Result</h4>
+              <p class="chat-helper-text">Have questions about this diagnosis? Ask our AI assistant for more details!</p>
+              
+              <div class="result-chat-messages" id="result-chat-messages">
+                <!-- Chat messages will appear here -->
+              </div>
+              
+              <div class="result-chat-input-container">
+                <textarea 
+                  id="result-chat-input" 
+                  placeholder="Ask a question about this diagnosis..." 
+                  rows="2"
+                ></textarea>
+                <button class="result-chat-send-btn" id="result-chat-send-btn">
+                  <i class="fas fa-paper-plane"></i> Send
+                </button>
+              </div>
+            </div>
+          </div>
+          <button class="new-scan-btn" id="new-scan-btn">
+            <i class="fas fa-redo"></i> Scan Another Image
+          </button>
+        </div>
+      </div>
+
+      <!-- AI Chat Assistant -->
+      <div class="chat-container" id="chat-container">
+        <div class="chat-header">
+          <div class="chat-header-content">
+            <div class="chat-avatar-wrapper">
+              <div class="chat-avatar">
+                <i class="fas fa-robot"></i>
+                <span class="status-indicator"></span>
+              </div>
+              <div class="chat-header-info">
+                <h3>AgriBot AI</h3>
+                <span class="chat-status">Online • Ready to help</span>
+              </div>
+            </div>
+          </div>
+          <div class="chat-header-actions">
+            <button class="chat-action-btn" id="chat-clear-btn" title="Clear chat">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+            <button class="chat-action-btn" id="chat-minimize-btn" title="Minimize">
+              <i class="fas fa-minus"></i>
+            </button>
+            <button class="chat-toggle-btn" id="chat-toggle-btn" title="Close">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-welcome">
+            <div class="welcome-icon">🌾</div>
+            <h4>Welcome to AgriBot AI!</h4>
+            <p>Your intelligent farming companion</p>
+            <div class="quick-questions">
+              <p class="quick-title">Quick questions:</p>
+              <button class="quick-btn" data-question="What is the best fertilizer for tomatoes?">
+                <i class="fas fa-seedling"></i> Tomato fertilizer
+              </button>
+              <button class="quick-btn" data-question="How to prevent fungal infections in crops?">
+                <i class="fas fa-shield-alt"></i> Prevent fungal infections
+              </button>
+              <button class="quick-btn" data-question="What are organic pest control methods?">
+                <i class="fas fa-bug"></i> Organic pest control
+              </button>
+              <button class="quick-btn" data-question="How to improve soil quality?">
+                <i class="fas fa-mountain"></i> Improve soil quality
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-container">
+          <button class="chat-attach-btn" id="chat-attach-btn" title="Quick actions">
+            <i class="fas fa-plus"></i>
+          </button>
+          <textarea 
+            id="chat-input" 
+            placeholder="Type your question here..." 
+            rows="1"
+          ></textarea>
+          <button class="chat-send-btn" id="chat-send-btn" title="Send message">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+        <div class="chat-suggestions" id="chat-suggestions">
+          <button class="suggestion-btn"><i class="fas fa-leaf"></i> Crop diseases</button>
+          <button class="suggestion-btn"><i class="fas fa-tint"></i> Irrigation tips</button>
+          <button class="suggestion-btn"><i class="fas fa-sun"></i> Weather advice</button>
+        </div>
+      </div>
+
+      <!-- Chat Floating Button -->
+      <button class="chat-float-btn" id="chat-float-btn">
+        <i class="fas fa-comments"></i>
+        <span class="chat-badge">Ask AI</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="about-section">
+    <div class="container">
+      <h2 class="section-title">About Smart Agriculture AI</h2>
+      <div class="about-grid">
+        <div class="about-card">
+          <i class="fas fa-brain"></i>
+          <h3>AI-Powered</h3>
+          <p>Uses Google Gemini 2.0 Flash Vision AI for accurate disease detection from leaf images</p>
+        </div>
+        <div class="about-card">
+          <i class="fas fa-bolt"></i>
+          <h3>Instant Results</h3>
+          <p>Get disease identification and treatment recommendations in seconds</p>
+        </div>
+        <div class="about-card">
+          <i class="fas fa-language"></i>
+          <h3>Multilingual</h3>
+          <p>Support for multiple languages to help farmers worldwide</p>
+        </div>
+        <div class="about-card">
+          <i class="fas fa-mobile-alt"></i>
+          <h3>Easy to Use</h3>
+          <p>Simple interface - just upload or capture a photo and get results</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features-section">
+    <div class="container">
+      <h2 class="section-title">Key Features</h2>
+      <div class="features-grid">
+        <div class="feature-item">
+          <i class="fas fa-leaf"></i>
+          <h3>Disease Detection</h3>
+          <p>Identify crop diseases from leaf images with high accuracy</p>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-pills"></i>
+          <h3>Treatment Suggestions</h3>
+          <p>Get instant remedies and treatment recommendations</p>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-shield-virus"></i>
+          <h3>Prevention Tips</h3>
+          <p>Learn how to prevent diseases before they spread</p>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-chart-line"></i>
+          <h3>Confidence Score</h3>
+          <p>See how confident the AI is about its diagnosis</p>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-camera"></i>
+          <h3>Camera Support</h3>
+          <p>Take photos directly or upload existing images</p>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-globe"></i>
+          <h3>Multi-Language</h3>
+          <p>Available in multiple languages for global farmers</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3><i class="fas fa-leaf"></i> Smart Agriculture AI</h3>
+          <p>Empowering farmers with AI-powered crop disease detection</p>
+        </div>
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#detect">Detect Disease</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#features">Features</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Contact</h4>
+          <p><i class="fas fa-envelope"></i> <a href="mailto:subh3012+1@gmail.com">subh3012+1@gmail.com</a></p>
+          <p><i class="fas fa-phone"></i> <a href="tel:+918093397462">+91 8093397462</a></p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Smart Agriculture AI. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+// Smart Agriculture AI - Complete Implementation
+// Gemini API Configuration
+const GEMINI_API_KEY = 'AIzaSyCYe80Qljs5RceGbtyn3n3O-wULTg7NdzE';
+// Using Gemini 2.0 Flash Experimental - latest model with advanced capabilities
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
+
+// Global Variables
+let currentImage = null;
+let currentLanguage = 'en';
+let cameraStream = null;
+
+// Translation Dictionary
+const translations = {
+  en: {
+    analyzing: "Analyzing your image...",
+    error: "Error analyzing image. Please try again.",
+    noDisease: "No disease detected. The plant appears healthy!",
+  },
+  hi: {
+    analyzing: "आपकी छवि का विश्लेषण किया जा रहा है...",
+    error: "छवि का विश्लेषण करने में त्रुटि। कृपया पुनः प्रयास करें।",
+    noDisease: "कोई बीमारी नहीं पाई गई। पौधा स्वस्थ दिखाई देता है!",
+  },
+  bn: {
+    analyzing: "আপনার ছবি বিশ্লেষণ করা হচ্ছে...",
+    error: "ছবি বিশ্লেষণে ত্রুটি। অনুগ্রহ করে আবার চেষ্টা করুন।",
+    noDisease: "কোনো রোগ সনাক্ত করা যায়নি। গাছটি সুস্থ দেখাচ্ছে!",
+  },
+  te: {
+    analyzing: "మీ చిత్రాన్ని విశ్లేషిస్తోంది...",
+    error: "చిత్రాన్ని విశ్లేషించడంలో లోపం. దయచేసి మళ్లీ ప్రయత్నించండి.",
+    noDisease: "ఎటువంటి వ్యాధి గుర్తించబడలేదు. మొక్క ఆరోగ్యంగా కనిపిస్తోంది!",
+  },
+  mr: {
+    analyzing: "तुमच्या प्रतिमेचे विश्लेषण करत आहे...",
+    error: "प्रतिमा विश्लेषणात त्रुटी. कृपया पुन्हा प्रयत्न करा.",
+    noDisease: "कोणताही रोग आढळला नाही. वनस्पती निरोगी दिसते!",
+  },
+  ta: {
+    analyzing: "உங்கள் படத்தை பகுப்பாய்வு செய்கிறது...",
+    error: "படத்தை பகுப்பாய்வு செய்வதில் பிழை. மீண்டும் முயற்சிக்கவும்.",
+    noDisease: "எந்த நோயும் கண்டறியப்படவில்லை. செடி ஆரோக்கியமாக தெரிகிறது!",
+  },
+  gu: {
+    analyzing: "તમારી છબીનું વિશ્લેષણ કરી રહ્યું છે...",
+    error: "છબી વિશ્લેષણમાં ભૂલ. કૃપા કરીને ફરી પ્રયાસ કરો.",
+    noDisease: "કોઈ રોગ મળ્યો નથી. છોડ સ્વસ્થ દેખાય છે!",
+  },
+  kn: {
+    analyzing: "ನಿಮ್ಮ ಚಿತ್ರವನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...",
+    error: "ಚಿತ್ರ ವಿಶ್ಲೇಷಣೆಯಲ್ಲಿ ದೋಷ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    noDisease: "ಯಾವುದೇ ರೋಗ ಪತ್ತೆಯಾಗಿಲ್ಲ. ಸಸ್ಯ ಆರೋಗ್ಯಕರವಾಗಿ ಕಾಣುತ್ತದೆ!",
+  },
+  ml: {
+    analyzing: "നിങ്ങളുടെ ചിത്രം വിശകലനം ചെയ്യുന്നു...",
+    error: "ചിത്രം വിശകലനം ചെയ്യുന്നതിൽ പിശക്. ദയവായി വീണ്ടും ശ്രമിക്കുക.",
+    noDisease: "രോഗമൊന്നും കണ്ടെത്തിയില്ല. ചെടി ആരോഗ്യകരമായി കാണപ്പെടുന്നു!",
+  },
+  pa: {
+    analyzing: "ਤੁਹਾਡੀ ਤਸਵੀਰ ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ...",
+    error: "ਤਸਵੀਰ ਵਿਸ਼ਲੇਸ਼ਣ ਵਿੱਚ ਗਲਤੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    noDisease: "ਕੋਈ ਬਿਮਾਰੀ ਨਹੀਂ ਮਿਲੀ। ਪੌਦਾ ਸਿਹਤਮੰਦ ਦਿਖਾਈ ਦਿੰਦਾ ਹੈ!",
+  },
+  or: {
+    analyzing: "ଆପଣଙ୍କ ଚିତ୍ରକୁ ବିଶ୍ଳେଷଣ କରାଯାଉଛି...",
+    error: "ଚିତ୍ର ବିଶ୍ଳେଷଣରେ ତ୍ରୁଟି। ଦୟାକରି ପୁନର୍ବାର ଚେଷ୍ଟା କରନ୍ତୁ।",
+    noDisease: "କୌଣସି ରୋଗ ଚିହ୍ନଟ ହୋଇନାହିଁ। ଉଦ୍ଭିଦ ସୁସ୍ଥ ଦେଖାଯାଉଛି!",
+  },
+  as: {
+    analyzing: "আপোনাৰ ছবি বিশ্লেষণ কৰা হৈছে...",
+    error: "ছবি বিশ্লেষণত ত্ৰুটি। অনুগ্ৰহ কৰি পুনৰ চেষ্টা কৰক।",
+    noDisease: "কোনো ৰোগ চিনাক্ত কৰা হোৱা নাই। উদ্ভিদ সুস্থ দেখা গৈছে!",
+  },
+  ur: {
+    analyzing: "آپ کی تصویر کا تجزیہ کیا جا رہا ہے...",
+    error: "تصویر کے تجزیے میں خرابی۔ براہ کرم دوبارہ کوشش کریں۔",
+    noDisease: "کوئی بیماری نہیں ملی۔ پودا صحت مند نظر آتا ہے!",
+  },
+  sa: {
+    analyzing: "भवतः चित्रस्य विश्लेषणं क्रियते...",
+    error: "चित्रविश्लेषणे त्रुटिः। कृपया पुनः प्रयतन्तु।",
+    noDisease: "कोऽपि रोगः न प्राप्तः। वृक्षः स्वस्थः दृश्यते!",
+  }
+};
+
+// DOM Elements
+const uploadArea = document.getElementById('upload-area');
+const fileInput = document.getElementById('file-input');
+const uploadBtn = document.getElementById('upload-btn');
+const previewContainer = document.getElementById('preview-container');
+const previewImage = document.getElementById('preview-image');
+const removeBtn = document.getElementById('remove-btn');
+const analyzeBtn = document.getElementById('analyze-btn');
+const loading = document.getElementById('loading');
+const resultsContainer = document.getElementById('results-container');
+const newScanBtn = document.getElementById('new-scan-btn');
+const languageSelect = document.getElementById('language-select');
+const cameraStreamElement = document.getElementById('camera-stream');
+const canvas = document.getElementById('canvas');
+
+// New mode toggle elements
+const uploadModeBtn = document.getElementById('upload-mode-btn');
+const cameraModeBtn = document.getElementById('camera-mode-btn');
+const uploadContent = document.getElementById('upload-content');
+const cameraSection = document.getElementById('camera-section');
+const captureBtn = document.getElementById('capture-btn');
+const cancelCameraBtn = document.getElementById('cancel-camera-btn');
+
+// Initialize App
+document.addEventListener('DOMContentLoaded', () => {
+  initializeEventListeners();
+  initializeNavigation();
+});
+
+// Initialize Event Listeners
+function initializeEventListeners() {
+  // Mobile Menu Toggle
+  const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+  const navMenu = document.getElementById('nav-menu');
+  const navBackdrop = document.getElementById('nav-backdrop');
+  
+  if (mobileMenuToggle) {
+    mobileMenuToggle.addEventListener('click', () => {
+      mobileMenuToggle.classList.toggle('active');
+      navMenu.classList.toggle('active');
+      navBackdrop.classList.toggle('active');
+      document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
+    });
+    
+    // Close menu when clicking on a nav link
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenuToggle.classList.remove('active');
+        navMenu.classList.remove('active');
+        navBackdrop.classList.remove('active');
+        document.body.style.overflow = '';
+      });
+    });
+    
+    // Close menu when clicking on backdrop
+    if (navBackdrop) {
+      navBackdrop.addEventListener('click', () => {
+        mobileMenuToggle.classList.remove('active');
+        navMenu.classList.remove('active');
+        navBackdrop.classList.remove('active');
+        document.body.style.overflow = '';
+      });
+    }
+  }
+  
+  // Mode Toggle
+  uploadModeBtn.addEventListener('click', switchToUploadMode);
+  cameraModeBtn.addEventListener('click', switchToCameraMode);
+  
+  // File Upload
+  uploadBtn.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', handleFileSelect);
+  
+  // Drag and Drop
+  uploadArea.addEventListener('dragover', handleDragOver);
+  uploadArea.addEventListener('dragleave', handleDragLeave);
+  uploadArea.addEventListener('drop', handleDrop);
+  
+  // Camera Controls
+  captureBtn.addEventListener('click', capturePhoto);
+  cancelCameraBtn.addEventListener('click', switchToUploadMode);
+  
+  // Remove Image
+  removeBtn.addEventListener('click', resetUpload);
+  
+  // Analyze
+  analyzeBtn.addEventListener('click', analyzeImage);
+  
+  // New Scan
+  newScanBtn.addEventListener('click', resetUpload);
+  
+  // Language Change
+  languageSelect.addEventListener('change', (e) => {
+    currentLanguage = e.target.value;
+  });
+}
+
+// Navigation
+function initializeNavigation() {
+  const navLinks = document.querySelectorAll('.nav-link');
+  const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+  const mobileToggle = document.getElementById('mobile-menu-toggle');
+  const navMenu = document.getElementById('nav-menu');
+  const navBackdrop = document.getElementById('nav-backdrop');
+  
+  // Smooth scroll on click - Desktop nav
+  navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = link.getAttribute('href');
+      const target = document.querySelector(targetId);
+      
+      if (target) {
+        // Close mobile menu if open
+        if (navMenu && navMenu.classList.contains('active')) {
+          mobileToggle.classList.remove('active');
+          navMenu.classList.remove('active');
+          if (navBackdrop) navBackdrop.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+        
+        // Smooth scroll to section
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+  
+  // Smooth scroll on click - Bottom nav
+  bottomNavItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = item.getAttribute('href');
+      const target = document.querySelector(targetId);
+      
+      if (target) {
+        // Smooth scroll to section
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+  
+  // Scroll-based section detection
+  function updateActiveSection() {
+    const sections = document.querySelectorAll('section[id]');
+    const navbar = document.querySelector('.navbar');
+    const navbarHeight = navbar ? navbar.offsetHeight : 80;
+    
+    // Get current scroll position (middle of viewport for better detection)
+    const scrollPosition = window.scrollY + navbarHeight + 100;
+    
+    let currentSection = null;
+    
+    // Find which section we're currently in
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop;
+      const sectionBottom = sectionTop + section.offsetHeight;
+      const sectionId = section.getAttribute('id');
+      
+      // Check if scroll position is within this section
+      if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+        currentSection = sectionId;
+      }
+    });
+    
+    // If no section found (at very top), use first section (home)
+    if (!currentSection && sections.length > 0) {
+      currentSection = sections[0].getAttribute('id');
+    }
+    
+    // Update all nav links with smooth transition
+    if (currentSection) {
+      // Update desktop nav links
+      navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        const linkSection = href.replace('#', '');
+        
+        if (linkSection === currentSection) {
+          if (!link.classList.contains('active')) {
+            link.classList.add('active');
+          }
+        } else {
+          if (link.classList.contains('active')) {
+            link.classList.remove('active');
+          }
+        }
+      });
+      
+      // Update bottom nav items
+      bottomNavItems.forEach(item => {
+        const itemSection = item.getAttribute('data-section');
+        
+        if (itemSection === currentSection) {
+          if (!item.classList.contains('active')) {
+            item.classList.add('active');
+          }
+        } else {
+          if (item.classList.contains('active')) {
+            item.classList.remove('active');
+          }
+        }
+      });
+    }
+  }
+  
+  // Listen to scroll events with debouncing
+  let scrollTimeout;
+  window.addEventListener('scroll', () => {
+    if (scrollTimeout) {
+      clearTimeout(scrollTimeout);
+    }
+    scrollTimeout = setTimeout(updateActiveSection, 20);
+  });
+  
+  // Also listen to resize events
+  window.addEventListener('resize', () => {
+    if (scrollTimeout) {
+      clearTimeout(scrollTimeout);
+    }
+    scrollTimeout = setTimeout(updateActiveSection, 100);
+  });
+  
+  // Initial check after page loads
+  setTimeout(updateActiveSection, 200);
+  
+  // Check again after images/content loads
+  window.addEventListener('load', () => {
+    setTimeout(updateActiveSection, 300);
+  });
+}
+
+// File Selection Handler
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file && file.type.startsWith('image/')) {
+    displayImage(file);
+  }
+}
+
+// Drag and Drop Handlers
+function handleDragOver(e) {
+  e.preventDefault();
+  uploadArea.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+  e.preventDefault();
+  uploadArea.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  uploadArea.classList.remove('drag-over');
+  
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    displayImage(file);
+  }
+}
+
+// Mode Switching Functions
+function switchToUploadMode() {
+  // Update button states
+  uploadModeBtn.classList.add('active');
+  cameraModeBtn.classList.remove('active');
+  
+  // Show upload content, hide camera
+  uploadContent.style.display = 'block';
+  cameraSection.style.display = 'none';
+  
+  // Stop camera if running
+  stopCamera();
+  
+  // Enable drag and drop
+  uploadArea.style.cursor = 'pointer';
+}
+
+function switchToCameraMode() {
+  // Update button states
+  cameraModeBtn.classList.add('active');
+  uploadModeBtn.classList.remove('active');
+  
+  // Hide upload content, show camera
+  uploadContent.style.display = 'none';
+  cameraSection.style.display = 'block';
+  
+  // Disable drag and drop
+  uploadArea.style.cursor = 'default';
+  
+  // Start camera
+  startCamera();
+}
+
+// Camera Functions
+async function startCamera() {
+  try {
+    console.log('Requesting camera access...');
+    
+    // Request camera with fallback options
+    const constraints = {
+      video: {
+        facingMode: 'environment',
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    };
+    
+    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    console.log('Camera access granted');
+    
+    cameraStreamElement.srcObject = cameraStream;
+    
+    // Wait for video to be ready
+    cameraStreamElement.onloadedmetadata = () => {
+      console.log('Camera stream ready');
+    };
+    
+  } catch (error) {
+    console.error('Error accessing camera:', error);
+    
+    // Try with simpler constraints as fallback
+    try {
+      console.log('Trying with basic camera constraints...');
+      cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      cameraStreamElement.srcObject = cameraStream;
+      console.log('Camera started with basic constraints');
+    } catch (fallbackError) {
+      console.error('Fallback camera access failed:', fallbackError);
+      alert('Unable to access camera. Please check:\n1. Camera permissions are granted\n2. You are using HTTPS or localhost\n3. No other app is using the camera');
+      switchToUploadMode();
+    }
+  }
+}
+
+function capturePhoto() {
+  console.log('Capture photo clicked');
+  
+  if (!cameraStream) {
+    alert('Camera is not active. Please try switching to camera mode again.');
+    return;
+  }
+  
+  // Check if video is ready
+  if (cameraStreamElement.videoWidth === 0 || cameraStreamElement.videoHeight === 0) {
+    alert('Camera is still loading. Please wait a moment and try again.');
+    return;
+  }
+  
+  console.log('Capturing photo...');
+  const context = canvas.getContext('2d');
+  canvas.width = cameraStreamElement.videoWidth;
+  canvas.height = cameraStreamElement.videoHeight;
+  context.drawImage(cameraStreamElement, 0, 0);
+  
+  console.log('Photo captured, creating file...');
+  
+  canvas.toBlob((blob) => {
+    if (!blob) {
+      alert('Failed to capture photo. Please try again.');
+      return;
+    }
+    
+    const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+    console.log('File created:', file.name, file.size, 'bytes');
+    displayImage(file);
+    stopCamera();
+    switchToUploadMode();
+  }, 'image/jpeg', 0.95);
+}
+
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+    cameraStreamElement.srcObject = null;
+  }
+}
+
+// Display Image
+function displayImage(file) {
+  currentImage = file;
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    previewImage.src = e.target.result;
+    uploadArea.style.display = 'none';
+    previewContainer.style.display = 'block';
+    analyzeBtn.style.display = 'block';
+    resultsContainer.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// Reset Upload
+function resetUpload() {
+  currentImage = null;
+  fileInput.value = '';
+  previewImage.src = '';
+  uploadArea.style.display = 'block';
+  previewContainer.style.display = 'none';
+  analyzeBtn.style.display = 'none';
+  resultsContainer.style.display = 'none';
+  loading.style.display = 'none';
+  
+  // Reset to upload mode
+  switchToUploadMode();
+}
+
+// Analyze Image with Gemini API
+async function analyzeImage() {
+  if (!currentImage) {
+    alert('Please select or capture an image first.');
+    return;
+  }
+  
+  console.log('Starting image analysis...');
+  console.log('Image file:', currentImage.name, currentImage.type, currentImage.size, 'bytes');
+  
+  // Show loading
+  analyzeBtn.style.display = 'none';
+  loading.style.display = 'block';
+  loading.querySelector('p').textContent = translations[currentLanguage].analyzing;
+  
+  try {
+    // Convert image to base64
+    console.log('Converting image to base64...');
+    const base64Image = await fileToBase64(currentImage);
+    console.log('Base64 conversion complete');
+    
+    // Create prompt for Gemini
+    const prompt = createPrompt(currentLanguage);
+    console.log('Prompt created for language:', currentLanguage);
+    
+    // Prepare request body
+    const requestBody = {
+      contents: [{
+        parts: [
+          { text: prompt },
+          {
+            inline_data: {
+              mime_type: currentImage.type || 'image/jpeg',
+              data: base64Image.split(',')[1]
+            }
+          }
+        ]
+      }],
+      generationConfig: {
+        temperature: 0.4,
+        topK: 32,
+        topP: 1,
+        maxOutputTokens: 2048,
+      }
+    };
+    
+    console.log('Sending request to Gemini API...');
+    
+    // Call Gemini API
+    const response = await fetch(GEMINI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody)
+    });
+    
+    console.log('Response status:', response.status);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('API Error Response:', errorData);
+      throw new Error(`API request failed with status ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
+    }
+    
+    const data = await response.json();
+    console.log('API Response received:', data);
+    
+    // Check if response has expected structure
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+      console.error('Unexpected API response structure:', data);
+      throw new Error('Invalid response from API');
+    }
+    
+    const result = data.candidates[0].content.parts[0].text;
+    console.log('Analysis result:', result);
+    
+    // Parse and display results
+    displayResults(result);
+    
+  } catch (error) {
+    console.error('Error during analysis:', error);
+    loading.style.display = 'none';
+    
+    let errorMessage = translations[currentLanguage].error;
+    if (error.message.includes('API request failed')) {
+      errorMessage += '\n\nDetails: ' + error.message;
+    }
+    
+    alert(errorMessage + '\n\nPlease check:\n1. Your internet connection\n2. API key is valid\n3. Browser console for more details');
+    analyzeBtn.style.display = 'block';
+  }
+}
+
+// Create Prompt based on language
+function createPrompt(language) {
+  const prompts = {
+    en: `You are an expert agricultural AI assistant. Analyze this image and determine what is shown (crop/plant, diseased leaf, pest, soil, or weed).
+
+Based on what you detect, provide a comprehensive analysis in JSON format:
+
+FOR HEALTHY CROPS/PLANTS:
+{
+  "type": "crop",
+  "cropName": "crop name and variety",
+  "growthStage": "vegetative/flowering/fruiting/harvesting",
+  "healthStatus": "healthy/stressed/diseased",
+  "confidence": 90,
+  "environmentalNeeds": {
+    "temperature": "optimal temperature range",
+    "sunlight": "sunlight requirements",
+    "watering": "watering frequency and amount"
+  },
+  "fertilizerRecommendation": "specific fertilizer advice",
+  "aiTips": ["tip 1", "tip 2", "tip 3"],
+  "treatment": "general care instructions",
+  "prevention": "preventive care measures"
+}
+
+FOR DISEASED PLANTS/PESTS:
+{
+  "type": "disease",
+  "disease": "disease or pest name",
+  "confidence": 85,
+  "cause": "what causes this issue",
+  "symptoms": "visible symptoms",
+  "severity": "mild/moderate/critical",
+  "affectedCrops": "which crops are affected",
+  "pesticides": {
+    "organic": [
+      {
+        "name": "pesticide name",
+        "dosage": "amount per liter/acre",
+        "applicationMethod": "how to apply (spray/drench/dust)",
+        "frequency": "how often to apply",
+        "timing": "best time to apply",
+        "safety": "safety precautions"
+      }
+    ],
+    "chemical": [
+      {
+        "name": "pesticide name",
+        "activeIngredient": "chemical compound",
+        "dosage": "amount per liter/acre",
+        "applicationMethod": "detailed application steps",
+        "frequency": "application schedule",
+        "timing": "best time to apply",
+        "safety": "safety precautions and PPE required"
+      }
+    ]
+  },
+  "treatment": "general treatment options",
+  "prevention": "prevention measures",
+  "aiTips": ["specific recommendations"]
+}
+
+FOR SOIL:
+{
+  "type": "soil",
+  "soilType": "loamy/clay/sandy/mixed",
+  "confidence": 80,
+  "nutrientStatus": {
+    "nitrogen": "level assessment",
+    "phosphorus": "level assessment",
+    "potassium": "level assessment"
+  },
+  "moistureContent": "moisture assessment",
+  "cropSuitability": ["suitable crops"],
+  "treatment": "fertilizer and pH adjustment advice",
+  "prevention": "soil maintenance tips"
+}
+
+FOR WEEDS:
+{
+  "type": "weed",
+  "disease": "weed name",
+  "confidence": 85,
+  "removalMethods": ["manual", "chemical", "mechanical options"],
+  "impactOnCrops": "how it affects crop growth",
+  "treatment": "removal and control methods",
+  "prevention": "prevention strategies",
+  "aiTips": ["specific recommendations"]
+}
+
+FOR DIRECT PEST IDENTIFICATION:
+{
+  "type": "pest",
+  "disease": "pest name",
+  "confidence": 90,
+  "affectedCrops": "crops this pest attacks",
+  "lifeCycle": "brief life cycle info",
+  "symptoms": "damage symptoms",
+  "treatment": "control methods (natural and chemical)",
+  "prevention": "prevention measures",
+  "bestTreatmentTime": "optimal treatment timing",
+  "aiTips": ["specific recommendations"]
+}
+
+Analyze the image carefully and respond with the appropriate JSON format based on what you detect. Always include confidence score.
+
+IMPORTANT: Provide ALL text fields (disease, treatment, prevention, symptoms, etc.) in English language.`,
+    
+    hi: `आप एक विशेषज्ञ कृषि AI सहायक हैं। इस छवि का विश्लेषण करें और हिंदी में प्रदान करें:
+
+1. रोग का नाम: पौधे को प्रभावित करने वाली बीमारी की पहचान करें
+2. विश्वास स्तर: इस निदान में आपका विश्वास (प्रतिशत के रूप में)
+3. उपचार और उपाय: सरल भाषा में विस्तृत उपचार चरण
+4. रोकथाम के उपाय: भविष्य में इस बीमारी को कैसे रोकें
+
+अपनी प्रतिक्रिया को JSON के रूप में प्रारूपित करें:
+{
+  "disease": "रोग का नाम या 'स्वस्थ पौधा'",
+  "confidence": 85,
+  "treatment": "विस्तृत उपचार चरण",
+  "prevention": "रोकथाम के उपाय"
+}`,
+    
+    es: `Eres un asistente experto en IA agrícola. Analiza esta imagen de hoja de planta/cultivo y proporciona:
+
+1. Nombre de la enfermedad: Identifica la enfermedad que afecta a la planta
+2. Nivel de confianza: Tu confianza en este diagnóstico (como porcentaje)
+3. Tratamiento y remedios: Pasos de tratamiento detallados en lenguaje simple
+4. Medidas de prevención: Cómo prevenir esta enfermedad en el futuro
+
+Formatea tu respuesta como JSON:
+{
+  "disease": "nombre de la enfermedad o 'Planta Saludable'",
+  "confidence": 85,
+  "treatment": "pasos de tratamiento detallados",
+  "prevention": "medidas de prevención"
+}`,
+    
+    fr: `Vous êtes un assistant IA agricole expert. Analysez cette image de feuille de plante/culture et fournissez:
+
+1. Nom de la maladie: Identifiez la maladie affectant la plante
+2. Niveau de confiance: Votre confiance dans ce diagnostic (en pourcentage)
+3. Traitement et remèdes: Étapes de traitement détaillées en langage simple
+4. Mesures de prévention: Comment prévenir cette maladie à l'avenir
+
+Formatez votre réponse en JSON:
+{
+  "disease": "nom de la maladie ou 'Plante Saine'",
+  "confidence": 85,
+  "treatment": "étapes de traitement détaillées",
+  "prevention": "mesures de prévention"
+}`
+  };
+  
+  // Language names for Gemini
+  const languageNames = {
+    en: 'English',
+    hi: 'Hindi (हिंदी)',
+    bn: 'Bengali (বাংলা)',
+    te: 'Telugu (తెలుగు)',
+    mr: 'Marathi (मराठी)',
+    ta: 'Tamil (தமிழ்)',
+    gu: 'Gujarati (ગુજરાતી)',
+    kn: 'Kannada (ಕನ್ನಡ)',
+    ml: 'Malayalam (മലയാളം)',
+    pa: 'Punjabi (ਪੰਜਾਬੀ)',
+    or: 'Odia (ଓଡ଼ିଆ)',
+    as: 'Assamese (অসমীয়া)',
+    ur: 'Urdu (اردو)',
+    sa: 'Sanskrit (संस्कृत)'
+  };
+  
+  const langName = languageNames[language] || 'English';
+  
+  // For non-English languages, modify the prompt to request response in that language
+  if (language !== 'en') {
+    return prompts.en.replace(
+      'IMPORTANT: Provide ALL text fields (disease, treatment, prevention, symptoms, etc.) in English language.',
+      `IMPORTANT: Provide ALL text fields (disease, treatment, prevention, symptoms, pesticide names, application methods, etc.) in ${langName} language. 
+
+For technical or difficult words, provide them in this format: "नेटिव वर्ड (English Translation)" or "Native Word (English meaning)".
+For example: 
+- "फफूंदनाशक (Fungicide)"
+- "ମଧ୍ୟମ (Moderate)"
+- "நோய் (Disease)"
+
+This helps farmers understand technical agricultural terms while reading in their native language.`
+    );
+  }
+  
+  return prompts.en;
+}
+
+// Display Results
+function displayResults(resultText) {
+  console.log('Displaying results...');
+  loading.style.display = 'none';
+  resultsContainer.style.display = 'block';
+  
+  try {
+    // Try to parse JSON response
+    let result;
+    
+    // Remove markdown code blocks if present
+    resultText = resultText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+    
+    const jsonMatch = resultText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      console.log('JSON found in response, parsing...');
+      result = JSON.parse(jsonMatch[0]);
+      console.log('Parsed result:', result);
+    } else {
+      console.log('No JSON found, using fallback parsing...');
+      // Fallback parsing
+      result = parseTextResponse(resultText);
+    }
+    
+    // Update UI with results
+    const diseaseName = result.disease || 'Unknown Disease';
+    console.log('Setting disease name:', diseaseName);
+    document.getElementById('disease-name').textContent = diseaseName;
+    
+    // Confidence
+    const confidence = Math.min(Math.max(result.confidence || 75, 0), 100);
+    console.log('Setting confidence:', confidence);
+    const confidenceFill = document.getElementById('confidence-fill');
+    confidenceFill.style.width = '0%';
+    setTimeout(() => {
+      confidenceFill.style.width = confidence + '%';
+    }, 100);
+    document.getElementById('confidence-text').textContent = confidence + '% Confidence';
+    
+    // Treatment
+    const treatment = result.treatment || result.solution || 'No treatment information available.';
+    console.log('Setting treatment');
+    document.getElementById('solution-text').innerHTML = formatText(treatment);
+    
+    // Prevention
+    const prevention = result.prevention || 'Follow good agricultural practices and monitor your crops regularly.';
+    console.log('Setting prevention');
+    document.getElementById('prevention-text').innerHTML = formatText(prevention);
+    
+    // Scroll to results with delay
+    setTimeout(() => {
+      resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+    
+    console.log('Results displayed successfully');
+    
+  } catch (error) {
+    console.error('Error parsing results:', error);
+    console.log('Using fallback display...');
+    displayFallbackResults(resultText);
+  }
+}
+
+// Parse Text Response (fallback)
+function parseTextResponse(text) {
+  return {
+    disease: extractSection(text, ['disease', 'रोग', 'enfermedad', 'maladie']) || 'Disease Detected',
+    confidence: 80,
+    treatment: extractSection(text, ['treatment', 'remedy', 'उपचार', 'tratamiento', 'traitement']) || text,
+    prevention: extractSection(text, ['prevention', 'रोकथाम', 'prevención', 'prévention']) || 'Follow good agricultural practices.'
+  };
+}
+
+// Extract Section from Text
+function extractSection(text, keywords) {
+  for (const keyword of keywords) {
+    const regex = new RegExp(`${keyword}[:\\s]+(.*?)(?=\\n\\n|$)`, 'is');
+    const match = text.match(regex);
+    if (match) return match[1].trim();
+  }
+  return null;
+}
+
+// Display Fallback Results
+function displayFallbackResults(text) {
+  document.getElementById('disease-name').textContent = 'Analysis Complete';
+  document.getElementById('confidence-fill').style.width = '80%';
+  document.getElementById('confidence-text').textContent = '80% Confidence';
+  document.getElementById('solution-text').innerHTML = formatText(text);
+  document.getElementById('prevention-text').innerHTML = 'Follow recommended agricultural practices and monitor your crops regularly.';
+}
+
+// Format Text (convert to HTML with lists)
+function formatText(text) {
+  // Convert numbered lists
+  text = text.replace(/(\d+)\.\s+([^\n]+)/g, '<li>$2</li>');
+  if (text.includes('<li>')) {
+    text = '<ul>' + text + '</ul>';
+  }
+  
+  // Convert line breaks
+  text = text.replace(/\n/g, '<br>');
+  
+  return text;
+}
+
+// Convert File to Base64
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+</script>
+  <script>
+// Enhanced Display Results Function
+function displayResults(resultText) {
+  console.log('Displaying results...');
+  loading.style.display = 'none';
+  resultsContainer.style.display = 'block';
+  
+  // Hide all detail sections first
+  hideAllDetailSections();
+  
+  try {
+    let result;
+    resultText = resultText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+    const jsonMatch = resultText.match(/\{[\s\S]*\}/);
+    
+    if (jsonMatch) {
+      result = JSON.parse(jsonMatch[0]);
+    } else {
+      result = parseTextResponse(resultText);
+    }
+    
+    const type = result.type || 'disease';
+    
+    // Set main identification
+    const mainName = result.disease || result.cropName || result.soilType || 'Analysis Complete';
+    document.getElementById('disease-name').innerHTML = formatTranslations(mainName);
+    
+    // Set confidence with enhanced display
+    const confidence = Math.min(Math.max(result.confidence || 75, 0), 100);
+    const confidenceFill = document.getElementById('confidence-fill');
+    const confidencePercentage = document.getElementById('confidence-percentage');
+    
+    // Animate confidence bar
+    confidenceFill.style.width = '0%';
+    setTimeout(() => {
+      confidenceFill.style.width = confidence + '%';
+      confidencePercentage.textContent = confidence + '%';
+    }, 100);
+    
+    // Determine confidence level and color
+    let confidenceLevel = '';
+    let confidenceColor = '';
+    let reliabilityText = '';
+    
+    if (confidence >= 90) {
+      confidenceLevel = 'Very High';
+      confidenceColor = 'linear-gradient(90deg, #4caf50, #66bb6a)';
+      reliabilityText = '✅ Highly reliable diagnosis. The AI is very confident in this analysis.';
+    } else if (confidence >= 75) {
+      confidenceLevel = 'High';
+      confidenceColor = 'linear-gradient(90deg, #8bc34a, #9ccc65)';
+      reliabilityText = '✓ Reliable diagnosis. The AI has strong confidence in this analysis.';
+    } else if (confidence >= 60) {
+      confidenceLevel = 'Moderate';
+      confidenceColor = 'linear-gradient(90deg, #ffc107, #ffca28)';
+      reliabilityText = '⚠️ Moderate confidence. Consider consulting an agricultural expert for confirmation.';
+    } else {
+      confidenceLevel = 'Low';
+      confidenceColor = 'linear-gradient(90deg, #ff9800, #ffa726)';
+      reliabilityText = '⚠️ Low confidence. It\'s recommended to get a second opinion from an expert.';
+    }
+    
+    confidenceFill.style.background = confidenceColor;
+    document.getElementById('confidence-text').innerHTML = `<strong>${confidence}%</strong> - ${formatTranslations(confidenceLevel + ' Confidence')}`;
+    document.getElementById('confidence-reliability').innerHTML = formatTranslations(result.confidenceReason || reliabilityText);
+    
+    // Display type-specific content
+    switch(type) {
+      case 'crop':
+        displayCropDetails(result);
+        break;
+      case 'disease':
+        displayDiseaseDetails(result);
+        break;
+      case 'soil':
+        displaySoilDetails(result);
+        break;
+      case 'weed':
+        displayWeedDetails(result);
+        break;
+      case 'pest':
+        displayPestDetails(result);
+        break;
+      default:
+        displayDiseaseDetails(result);
+    }
+    
+    // Pesticides section (for diseases and pests)
+    if (result.pesticides && (type === 'disease' || type === 'pest')) {
+      displayPesticides(result.pesticides);
+    }
+    
+    // Common sections
+    document.getElementById('solution-text').innerHTML = formatText(result.treatment || 'No treatment information available.');
+    document.getElementById('prevention-text').innerHTML = formatText(result.prevention || 'Follow good agricultural practices.');
+    
+    // AI Tips
+    if (result.aiTips && result.aiTips.length > 0) {
+      displayAITips(result.aiTips);
+    }
+    
+    // Set diagnosis context for result chat
+    if (typeof setDiagnosisContext === 'function') {
+      setDiagnosisContext(result);
+    }
+    
+    setTimeout(() => resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+    
+  } catch (error) {
+    console.error('Error:', error);
+    displayFallbackResults(resultText);
+  }
+}
+
+function hideAllDetailSections() {
+  document.getElementById('crop-details').style.display = 'none';
+  document.getElementById('disease-details').style.display = 'none';
+  document.getElementById('soil-details').style.display = 'none';
+  document.getElementById('weed-details').style.display = 'none';
+  document.getElementById('pest-details').style.display = 'none';
+  document.getElementById('ai-tips-section').style.display = 'none';
+}
+
+function displayCropDetails(result) {
+  document.getElementById('crop-details').style.display = 'block';
+  document.getElementById('growth-stage').innerHTML = formatTranslations(result.growthStage || 'N/A');
+  document.getElementById('health-status').innerHTML = `<span class="health-badge health-${result.healthStatus}">${formatTranslations(result.healthStatus || 'Unknown')}</span>`;
+  
+  if (result.environmentalNeeds) {
+    const env = result.environmentalNeeds;
+    document.getElementById('environmental-needs').innerHTML = `
+      <ul>
+        <li><strong>Temperature:</strong> ${formatTranslations(env.temperature || 'N/A')}</li>
+        <li><strong>Sunlight:</strong> ${formatTranslations(env.sunlight || 'N/A')}</li>
+        <li><strong>Watering:</strong> ${formatTranslations(env.watering || 'N/A')}</li>
+      </ul>`;
+  }
+  
+  document.getElementById('fertilizer-rec').innerHTML = formatTranslations(result.fertilizerRecommendation || 'N/A');
+}
+
+function displayDiseaseDetails(result) {
+  document.getElementById('disease-details').style.display = 'block';
+  document.getElementById('cause-symptoms').innerHTML = formatTranslations(`${result.cause || ''} ${result.symptoms || ''}`.trim() || 'N/A');
+  
+  const severity = result.severity || 'moderate';
+  document.getElementById('severity-level').innerHTML = `<span class="severity-badge severity-${severity}">${formatTranslations(severity)}</span>`;
+  document.getElementById('affected-crops').innerHTML = formatTranslations(result.affectedCrops || 'N/A');
+}
+
+function displaySoilDetails(result) {
+  document.getElementById('soil-details').style.display = 'block';
+  document.getElementById('soil-type').innerHTML = formatTranslations(result.soilType || 'N/A');
+  
+  if (result.nutrientStatus) {
+    const nutrients = result.nutrientStatus;
+    document.getElementById('nutrient-status').innerHTML = `
+      <ul>
+        <li><strong>Nitrogen:</strong> ${formatTranslations(nutrients.nitrogen || 'N/A')}</li>
+        <li><strong>Phosphorus:</strong> ${formatTranslations(nutrients.phosphorus || 'N/A')}</li>
+        <li><strong>Potassium:</strong> ${formatTranslations(nutrients.potassium || 'N/A')}</li>
+      </ul>`;
+  }
+  
+  document.getElementById('moisture-content').innerHTML = formatTranslations(result.moistureContent || 'N/A');
+  document.getElementById('crop-suitability').innerHTML = formatTranslations(Array.isArray(result.cropSuitability) ? result.cropSuitability.join(', ') : result.cropSuitability || 'N/A');
+}
+
+function displayWeedDetails(result) {
+  document.getElementById('weed-details').style.display = 'block';
+  
+  if (result.removalMethods && Array.isArray(result.removalMethods)) {
+    document.getElementById('removal-methods').innerHTML = '<ul>' + result.removalMethods.map(m => `<li>${formatTranslations(m)}</li>`).join('') + '</ul>';
+  }
+  
+  document.getElementById('impact-crops').innerHTML = formatTranslations(result.impactOnCrops || 'N/A');
+}
+
+function displayPestDetails(result) {
+  document.getElementById('pest-details').style.display = 'block';
+  document.getElementById('life-cycle').innerHTML = formatTranslations(result.lifeCycle || 'N/A');
+  document.getElementById('treatment-time').innerHTML = formatTranslations(result.bestTreatmentTime || 'N/A');
+}
+
+function displayAITips(tips) {
+  const section = document.getElementById('ai-tips-section');
+  const container = document.getElementById('ai-tips');
+  section.style.display = 'block';
+  container.innerHTML = tips.map(tip => `<div class="ai-tip-item">${formatTranslations(tip)}</div>`).join('');
+}
+
+// Format text to highlight English translations in parentheses
+function formatTranslations(text) {
+  if (!text) return text;
+  
+  // Match pattern: "Native text (English translation)"
+  // This will style the English part differently
+  return text.replace(/\(([A-Za-z\s]+)\)/g, '<span style="color: #666; font-size: 0.9em; font-style: italic;">($1)</span>');
+}
+
+function displayPesticides(pesticides) {
+  const section = document.getElementById('pesticides-section');
+  section.style.display = 'block';
+  
+  // Display organic pesticides
+  if (pesticides.organic && pesticides.organic.length > 0) {
+    const organicContainer = document.getElementById('organic-details');
+    organicContainer.innerHTML = pesticides.organic.map(p => `
+      <div class="pesticide-item">
+        <div class="pesticide-name">${formatTranslations(p.name)}</div>
+        <div class="pesticide-info">
+          <div class="dosage-info">📊 Dosage: ${formatTranslations(p.dosage)}</div>
+          <div class="application-method">
+            <h5>🚜 Application Method:</h5>
+            <p>${formatTranslations(p.applicationMethod)}</p>
+          </div>
+          <p><strong>⏰ Frequency:</strong> ${formatTranslations(p.frequency)}</p>
+          <p><strong>🕐 Best Timing:</strong> ${formatTranslations(p.timing)}</p>
+          ${p.safety ? `<div class="safety-warning"><p>${formatTranslations(p.safety)}</p></div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+  
+  // Display chemical pesticides
+  if (pesticides.chemical && pesticides.chemical.length > 0) {
+    const chemicalContainer = document.getElementById('chemical-details');
+    chemicalContainer.innerHTML = pesticides.chemical.map(p => `
+      <div class="pesticide-item">
+        <div class="pesticide-name">${formatTranslations(p.name)}</div>
+        ${p.activeIngredient ? `<p><strong>🧪 Active Ingredient:</strong> ${formatTranslations(p.activeIngredient)}</p>` : ''}
+        <div class="pesticide-info">
+          <div class="dosage-info">📊 Dosage: ${formatTranslations(p.dosage)}</div>
+          <div class="application-method">
+            <h5>🚜 Application Method:</h5>
+            <p>${formatTranslations(p.applicationMethod)}</p>
+          </div>
+          <p><strong>⏰ Frequency:</strong> ${formatTranslations(p.frequency)}</p>
+          <p><strong>🕐 Best Timing:</strong> ${formatTranslations(p.timing)}</p>
+          ${p.safety ? `<div class="safety-warning"><p>${formatTranslations(p.safety)}</p></div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+// Tab switching function for pesticides
+function showPesticideTab(type) {
+  // Update tab buttons
+  document.querySelectorAll('.pesticide-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  // Show/hide content
+  document.getElementById('organic-pesticides').style.display = type === 'organic' ? 'block' : 'none';
+  document.getElementById('chemical-pesticides').style.display = type === 'chemical' ? 'block' : 'none';
+}
+
+</script>
+  <script>
+// AI Chat Assistant for Agriculture
+// Uses Gemini API for conversational agriculture advice
+
+const chatFloatBtn = document.getElementById('chat-float-btn');
+const chatContainer = document.getElementById('chat-container');
+const chatToggleBtn = document.getElementById('chat-toggle-btn');
+const chatMessages = document.getElementById('chat-messages');
+const chatInput = document.getElementById('chat-input');
+const chatSendBtn = document.getElementById('chat-send-btn');
+
+// Result chat elements
+const resultChatMessages = document.getElementById('result-chat-messages');
+const resultChatInput = document.getElementById('result-chat-input');
+const resultChatSendBtn = document.getElementById('result-chat-send-btn');
+
+let chatHistory = [];
+let resultChatHistory = [];
+let currentDiagnosisContext = '';
+
+// Initialize Chat
+function initializeChat() {
+  // Toggle chat on float button click
+  chatFloatBtn.addEventListener('click', openChat);
+  
+  // Close chat
+  chatToggleBtn.addEventListener('click', closeChat);
+  
+  // Clear chat
+  const chatClearBtn = document.getElementById('chat-clear-btn');
+  if (chatClearBtn) {
+    chatClearBtn.addEventListener('click', clearChat);
+  }
+  
+  // Minimize chat
+  const chatMinimizeBtn = document.getElementById('chat-minimize-btn');
+  if (chatMinimizeBtn) {
+    chatMinimizeBtn.addEventListener('click', closeChat);
+  }
+  
+  // Quick question buttons
+  document.querySelectorAll('.quick-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const question = btn.dataset.question;
+      chatInput.value = question;
+      sendMessage();
+    });
+  });
+  
+  // Suggestion buttons
+  document.querySelectorAll('.suggestion-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const topic = btn.textContent.trim();
+      chatInput.value = `Tell me about ${topic.toLowerCase()}`;
+      chatInput.focus();
+    });
+  });
+  
+  // Send message on button click
+  chatSendBtn.addEventListener('click', sendMessage);
+  
+  // Send message on Enter key (Shift+Enter for new line)
+  chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+  
+  // Auto-resize textarea
+  chatInput.addEventListener('input', () => {
+    chatInput.style.height = 'auto';
+    chatInput.style.height = chatInput.scrollHeight + 'px';
+  });
+  
+  // Result chat event listeners
+  if (resultChatSendBtn) {
+    resultChatSendBtn.addEventListener('click', () => sendResultMessage());
+  }
+  
+  if (resultChatInput) {
+    resultChatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendResultMessage();
+      }
+    });
+    
+    resultChatInput.addEventListener('input', () => {
+      resultChatInput.style.height = 'auto';
+      resultChatInput.style.height = resultChatInput.scrollHeight + 'px';
+    });
+  }
+}
+
+// Open Chat
+function openChat() {
+  chatContainer.classList.add('active');
+  chatFloatBtn.style.display = 'none';
+  chatInput.focus();
+}
+
+// Close Chat
+function closeChat() {
+  chatContainer.classList.remove('active');
+  chatFloatBtn.style.display = 'flex';
+}
+
+// Clear Chat
+function clearChat() {
+  if (confirm('Are you sure you want to clear all chat messages?')) {
+    chatHistory = [];
+    chatMessages.innerHTML = `
+      <div class="chat-welcome">
+        <div class="welcome-icon">🌾</div>
+        <h4>Welcome to AgriBot AI!</h4>
+        <p>Your intelligent farming companion</p>
+        <div class="quick-questions">
+          <p class="quick-title">Quick questions:</p>
+          <button class="quick-btn" data-question="What is the best fertilizer for tomatoes?">
+            <i class="fas fa-seedling"></i> Tomato fertilizer
+          </button>
+          <button class="quick-btn" data-question="How to prevent fungal infections in crops?">
+            <i class="fas fa-shield-alt"></i> Prevent fungal infections
+          </button>
+          <button class="quick-btn" data-question="What are organic pest control methods?">
+            <i class="fas fa-bug"></i> Organic pest control
+          </button>
+          <button class="quick-btn" data-question="How to improve soil quality?">
+            <i class="fas fa-mountain"></i> Improve soil quality
+          </button>
+        </div>
+      </div>
+    `;
+    
+    // Re-attach quick button listeners
+    document.querySelectorAll('.quick-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const question = btn.dataset.question;
+        chatInput.value = question;
+        sendMessage();
+      });
+    });
+  }
+}
+
+// Get current time
+function getCurrentTime() {
+  const now = new Date();
+  return now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+
+// Send Message
+async function sendMessage() {
+  const message = chatInput.value.trim();
+  
+  if (!message) return;
+  
+  // Add user message to chat
+  addUserMessage(message);
+  
+  // Clear input
+  chatInput.value = '';
+  chatInput.style.height = 'auto';
+  
+  // Disable send button
+  chatSendBtn.disabled = true;
+  
+  // Show loading indicator
+  const loadingId = addLoadingMessage();
+  
+  try {
+    // Get AI response
+    const response = await getAIResponse(message);
+    
+    // Remove loading indicator
+    removeLoadingMessage(loadingId);
+    
+    // Add bot response
+    addBotMessage(response);
+    
+  } catch (error) {
+    console.error('Chat error:', error);
+    
+    // Remove loading indicator
+    removeLoadingMessage(loadingId);
+    
+    // Add error message
+    addBotMessage('Sorry, I encountered an error. Please try again or check your internet connection.');
+  } finally {
+    // Re-enable send button
+    chatSendBtn.disabled = false;
+    chatInput.focus();
+  }
+}
+
+// Add User Message
+function addUserMessage(message) {
+  // Remove welcome screen if exists
+  const welcomeScreen = chatMessages.querySelector('.chat-welcome');
+  if (welcomeScreen) {
+    welcomeScreen.remove();
+  }
+  
+  const messageEl = document.createElement('div');
+  messageEl.className = 'chat-message user-message';
+  messageEl.innerHTML = `
+    <div class="message-avatar">👤</div>
+    <div class="message-content">
+      <p>${escapeHtml(message)}</p>
+      <span class="message-time">${getCurrentTime()}</span>
+    </div>
+  `;
+  
+  chatMessages.appendChild(messageEl);
+  scrollToBottom();
+  
+  // Add to history
+  chatHistory.push({
+    role: 'user',
+    parts: [{ text: message }]
+  });
+}
+
+// Add Bot Message
+function addBotMessage(message) {
+  const messageEl = document.createElement('div');
+  messageEl.className = 'chat-message bot-message';
+  messageEl.innerHTML = `
+    <div class="message-avatar">🤖</div>
+    <div class="message-content">
+      ${formatBotMessage(message)}
+      <span class="message-time">${getCurrentTime()}</span>
+    </div>
+  `;
+  
+  chatMessages.appendChild(messageEl);
+  scrollToBottom();
+  
+  // Add to history
+  chatHistory.push({
+    role: 'model',
+    parts: [{ text: message }]
+  });
+}
+
+// Add Loading Message
+function addLoadingMessage() {
+  const loadingId = 'loading-' + Date.now();
+  const messageEl = document.createElement('div');
+  messageEl.className = 'chat-message bot-message';
+  messageEl.id = loadingId;
+  messageEl.innerHTML = `
+    <div class="message-avatar">🤖</div>
+    <div class="message-content">
+      <div class="message-loading">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  `;
+  
+  chatMessages.appendChild(messageEl);
+  scrollToBottom();
+  
+  return loadingId;
+}
+
+// Remove Loading Message
+function removeLoadingMessage(loadingId) {
+  const loadingEl = document.getElementById(loadingId);
+  if (loadingEl) {
+    loadingEl.remove();
+  }
+}
+
+// Get AI Response from Gemini
+async function getAIResponse(userMessage) {
+  const systemPrompt = `You are an expert agricultural AI assistant. Provide helpful, accurate, and practical advice on:
+- Crop cultivation and management
+- Plant diseases and treatments
+- Pest control (organic and chemical methods)
+- Soil health and fertilizers
+- Irrigation and water management
+- Sustainable farming practices
+- Agricultural best practices for different climates
+
+Keep responses concise, practical, and farmer-friendly. Use simple language${currentLanguage !== 'en' ? ' and respond in the user\'s language when appropriate' : ''}.`;
+
+  const contents = [
+    {
+      role: 'user',
+      parts: [{ text: systemPrompt }]
+    },
+    ...chatHistory,
+    {
+      role: 'user',
+      parts: [{ text: userMessage }]
+    }
+  ];
+
+  const requestBody = {
+    contents: contents,
+    generationConfig: {
+      temperature: 0.7,
+      topK: 40,
+      topP: 0.95,
+      maxOutputTokens: 1024,
+    }
+  };
+
+  const response = await fetch(GEMINI_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody)
+  });
+
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  
+  if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+    return data.candidates[0].content.parts[0].text;
+  }
+  
+  throw new Error('Invalid response format');
+}
+
+// Format Bot Message
+function formatBotMessage(message) {
+  // First, remove all asterisk formatting
+  message = message.replace(/\*\*/g, '');  // Remove bold markers
+  message = message.replace(/\*/g, '');    // Remove italic markers
+  
+  // Escape HTML
+  message = escapeHtml(message);
+  
+  // Convert numbered lists
+  message = message.replace(/(\d+)\.\s+([^\n]+)/g, '<li>$2</li>');
+  if (message.includes('<li>')) {
+    message = '<ol>' + message + '</ol>';
+  }
+  
+  // Convert bullet points
+  message = message.replace(/[-•]\s+([^\n]+)/g, '<li>$1</li>');
+  if (message.includes('<li>') && !message.includes('<ol>')) {
+    message = '<ul>' + message + '</ul>';
+  }
+  
+  // Convert line breaks to paragraphs for better readability
+  const paragraphs = message.split(/\n\n+/);
+  if (paragraphs.length > 1 && !message.includes('<li>')) {
+    message = paragraphs.map(p => p.trim() ? `<p>${p.replace(/\n/g, '<br>')}</p>` : '').join('');
+  } else {
+    message = message.replace(/\n/g, '<br>');
+  }
+  
+  // Wrap in paragraph if no HTML tags
+  if (!message.includes('<')) {
+    message = '<p>' + message + '</p>';
+  }
+  
+  return message;
+}
+
+// Scroll to Bottom
+function scrollToBottom() {
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Escape HTML
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Send Result Chat Message
+async function sendResultMessage() {
+  const message = resultChatInput.value.trim();
+  
+  if (!message) return;
+  
+  // Add user message to result chat
+  addResultUserMessage(message);
+  
+  // Clear input
+  resultChatInput.value = '';
+  resultChatInput.style.height = 'auto';
+  
+  // Disable send button
+  resultChatSendBtn.disabled = true;
+  
+  // Show loading indicator
+  const loadingId = addResultLoadingMessage();
+  
+  try {
+    // Get AI response with diagnosis context
+    const response = await getResultAIResponse(message);
+    
+    // Remove loading indicator
+    removeResultLoadingMessage(loadingId);
+    
+    // Add bot response
+    addResultBotMessage(response);
+    
+  } catch (error) {
+    console.error('Result chat error:', error);
+    
+    // Remove loading indicator
+    removeResultLoadingMessage(loadingId);
+    
+    // Add error message
+    addResultBotMessage('Sorry, I encountered an error. Please try again.');
+  } finally {
+    // Re-enable send button
+    resultChatSendBtn.disabled = false;
+    resultChatInput.focus();
+  }
+}
+
+// Add Result User Message
+function addResultUserMessage(message) {
+  const messageEl = document.createElement('div');
+  messageEl.className = 'chat-message user-message';
+  messageEl.innerHTML = `
+    <div class="message-avatar">👤</div>
+    <div class="message-content">
+      <p>${escapeHtml(message)}</p>
+    </div>
+  `;
+  
+  resultChatMessages.appendChild(messageEl);
+  scrollResultToBottom();
+  
+  // Add to history
+  resultChatHistory.push({
+    role: 'user',
+    parts: [{ text: message }]
+  });
+}
+
+// Add Result Bot Message
+function addResultBotMessage(message) {
+  const messageEl = document.createElement('div');
+  messageEl.className = 'chat-message bot-message';
+  messageEl.innerHTML = `
+    <div class="message-avatar">🤖</div>
+    <div class="message-content">
+      ${formatBotMessage(message)}
+    </div>
+  `;
+  
+  resultChatMessages.appendChild(messageEl);
+  scrollResultToBottom();
+  
+  // Add to history
+  resultChatHistory.push({
+    role: 'model',
+    parts: [{ text: message }]
+  });
+}
+
+// Add Result Loading Message
+function addResultLoadingMessage() {
+  const loadingId = 'result-loading-' + Date.now();
+  const messageEl = document.createElement('div');
+  messageEl.className = 'chat-message bot-message';
+  messageEl.id = loadingId;
+  messageEl.innerHTML = `
+    <div class="message-avatar">🤖</div>
+    <div class="message-content">
+      <div class="message-loading">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  `;
+  
+  resultChatMessages.appendChild(messageEl);
+  scrollResultToBottom();
+  
+  return loadingId;
+}
+
+// Remove Result Loading Message
+function removeResultLoadingMessage(loadingId) {
+  const loadingEl = document.getElementById(loadingId);
+  if (loadingEl) {
+    loadingEl.remove();
+  }
+}
+
+// Get AI Response for Result Chat (with diagnosis context)
+async function getResultAIResponse(userMessage) {
+  const systemPrompt = `You are an expert agricultural AI assistant helping a farmer understand their crop diagnosis results.
+
+Current Diagnosis Context:
+${currentDiagnosisContext}
+
+Provide helpful, specific answers about this diagnosis including:
+- More details about the identified disease/condition
+- Treatment clarifications
+- Pesticide usage guidance
+- Prevention strategies
+- When to seek professional help
+
+Keep responses concise and practical. Respond in the user's language when appropriate.`;
+
+  const contents = [
+    {
+      role: 'user',
+      parts: [{ text: systemPrompt }]
+    },
+    ...resultChatHistory,
+    {
+      role: 'user',
+      parts: [{ text: userMessage }]
+    }
+  ];
+
+  const requestBody = {
+    contents: contents,
+    generationConfig: {
+      temperature: 0.7,
+      topK: 40,
+      topP: 0.95,
+      maxOutputTokens: 1024,
+    }
+  };
+
+  const response = await fetch(GEMINI_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody)
+  });
+
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  
+  if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+    return data.candidates[0].content.parts[0].text;
+  }
+  
+  throw new Error('Invalid response format');
+}
+
+// Set Diagnosis Context (called when results are displayed)
+function setDiagnosisContext(diagnosisData) {
+  currentDiagnosisContext = `
+Disease/Condition: ${diagnosisData.disease || diagnosisData.cropName || 'Unknown'}
+Confidence: ${diagnosisData.confidence}%
+Type: ${diagnosisData.type || 'disease'}
+${diagnosisData.severity ? `Severity: ${diagnosisData.severity}` : ''}
+${diagnosisData.symptoms ? `Symptoms: ${diagnosisData.symptoms}` : ''}
+${diagnosisData.cause ? `Cause: ${diagnosisData.cause}` : ''}
+  `.trim();
+  
+  // Clear previous result chat history
+  resultChatHistory = [];
+  
+  // Clear result chat messages
+  if (resultChatMessages) {
+    resultChatMessages.innerHTML = '';
+  }
+}
+
+// Scroll Result Chat to Bottom
+function scrollResultToBottom() {
+  resultChatMessages.scrollTop = resultChatMessages.scrollHeight;
+}
+
+// Initialize chat when DOM is loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeChat);
+} else {
+  initializeChat();
+}
+
+
+</script>
+  <script>
+// Advanced Language Selector
+const languageBtn = document.getElementById('language-btn');
+const languageDropdown = document.getElementById('language-dropdown');
+const languageSearch = document.getElementById('language-search');
+const languageList = document.getElementById('language-list');
+const languageItems = document.querySelectorAll('.language-item');
+
+// Toggle dropdown
+if (languageBtn) {
+  languageBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    languageBtn.classList.toggle('active');
+    languageDropdown.classList.toggle('active');
+    
+    if (languageDropdown.classList.contains('active')) {
+      languageSearch.focus();
+    }
+  });
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  if (languageDropdown && !languageDropdown.contains(e.target) && e.target !== languageBtn) {
+    languageBtn.classList.remove('active');
+    languageDropdown.classList.remove('active');
+  }
+});
+
+// Search functionality
+if (languageSearch) {
+  languageSearch.addEventListener('input', (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    
+    languageItems.forEach(item => {
+      const langName = item.querySelector('.lang-name').textContent.toLowerCase();
+      
+      if (langName.includes(searchTerm)) {
+        item.classList.remove('hidden');
+        item.style.animation = 'fadeIn 0.3s ease';
+      } else {
+        item.classList.add('hidden');
+      }
+    });
+  });
+  
+  // Prevent dropdown from closing when clicking search input
+  languageSearch.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+}
+
+// Language selection
+languageItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const lang = item.dataset.lang;
+    const flag = item.dataset.flag;
+    const name = item.dataset.name;
+    
+    // Update active state
+    languageItems.forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    
+    // Update button
+    const languageFlagEl = languageBtn.querySelector('.language-flag');
+    const languageNameEl = languageBtn.querySelector('.language-name');
+    
+    languageFlagEl.textContent = flag;
+    languageNameEl.textContent = name;
+    
+    // Update global language variable
+    currentLanguage = lang;
+    
+    // Close dropdown
+    languageBtn.classList.remove('active');
+    languageDropdown.classList.remove('active');
+    
+    // Clear search
+    if (languageSearch) {
+      languageSearch.value = '';
+      languageItems.forEach(i => i.classList.remove('hidden'));
+    }
+    
+    // Show notification
+    showLanguageNotification(name);
+  });
+});
+
+// Show language change notification
+function showLanguageNotification(languageName) {
+  // Remove existing notification
+  const existingNotif = document.querySelector('.language-notification');
+  if (existingNotif) {
+    existingNotif.remove();
+  }
+  
+  // Create notification
+  const notification = document.createElement('div');
+  notification.className = 'language-notification';
+  notification.innerHTML = `
+    <i class="fas fa-check-circle"></i>
+    <span>Language changed to <strong>${languageName}</strong></span>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // Animate in
+  setTimeout(() => notification.classList.add('show'), 10);
+  
+  // Remove after 3 seconds
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+// Keyboard navigation
+if (languageDropdown) {
+  languageDropdown.addEventListener('keydown', (e) => {
+    const visibleItems = Array.from(languageItems).filter(item => !item.classList.contains('hidden'));
+    const currentIndex = visibleItems.findIndex(item => item === document.activeElement);
+    
+    switch(e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        if (currentIndex < visibleItems.length - 1) {
+          visibleItems[currentIndex + 1].focus();
+        } else {
+          visibleItems[0].focus();
+        }
+        break;
+        
+      case 'ArrowUp':
+        e.preventDefault();
+        if (currentIndex > 0) {
+          visibleItems[currentIndex - 1].focus();
+        } else {
+          visibleItems[visibleItems.length - 1].focus();
+        }
+        break;
+        
+      case 'Enter':
+        e.preventDefault();
+        if (document.activeElement.classList.contains('language-item')) {
+          document.activeElement.click();
+        }
+        break;
+        
+      case 'Escape':
+        e.preventDefault();
+        languageBtn.classList.remove('active');
+        languageDropdown.classList.remove('active');
+        languageBtn.focus();
+        break;
+    }
+  });
+  
+  // Make language items focusable
+  languageItems.forEach(item => {
+    item.setAttribute('tabindex', '0');
+  });
+}
+
+</script>
+  <script>
+// AccuWeather API Configuration
+// Get your free API key from: https://developer.accuweather.com/
+const ACCUWEATHER_API_KEY = 'zpka_fc5e06c7548146b1829f56518664c916_777467c4';
+
+// AccuWeather API endpoints
+const ACCUWEATHER_BASE_URL = 'https://dataservice.accuweather.com';
+const LOCATION_API = `${ACCUWEATHER_BASE_URL}/locations/v1/cities/geoposition/search`;
+const CURRENT_CONDITIONS_API = `${ACCUWEATHER_BASE_URL}/currentconditions/v1`;
+const FORECAST_API = `${ACCUWEATHER_BASE_URL}/forecasts/v1/daily/5day`;
+
+// Cache for location data
+let cachedLocationKey = null;
+let cachedLocationName = null;
+let lastWeatherUpdate = null;
+
+// Initialize weather on page load
+document.addEventListener('DOMContentLoaded', () => {
+  initializeWeather();
+  
+  // Event listeners
+  const refreshBtn = document.getElementById('weather-refresh-btn');
+  const retryBtn = document.getElementById('weather-retry-btn');
+  const searchBtn = document.getElementById('weather-search-btn');
+  const searchInput = document.getElementById('weather-search-input');
+  const locationBtn = document.getElementById('weather-location-btn');
+  const tipsToggle = document.getElementById('weather-tips-toggle');
+  
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      refreshBtn.classList.add('rotating');
+      fetchWeather();
+      setTimeout(() => refreshBtn.classList.remove('rotating'), 1000);
+    });
+  }
+  
+  if (retryBtn) {
+    retryBtn.addEventListener('click', () => {
+      fetchWeather();
+    });
+  }
+  
+  // Search functionality
+  if (searchBtn && searchInput) {
+    searchBtn.addEventListener('click', () => {
+      const cityName = searchInput.value.trim();
+      if (cityName) {
+        searchCityWeather(cityName);
+      }
+    });
+    
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const cityName = searchInput.value.trim();
+        if (cityName) {
+          searchCityWeather(cityName);
+        }
+      }
+    });
+  }
+  
+  // Location button
+  if (locationBtn) {
+    locationBtn.addEventListener('click', () => {
+      cachedLocationKey = null;
+      cachedLocationName = null;
+      fetchWeather();
+    });
+  }
+  
+  // Tips toggle
+  if (tipsToggle) {
+    tipsToggle.addEventListener('click', () => {
+      const tipsSection = document.getElementById('weather-agriculture-tips');
+      tipsToggle.classList.toggle('active');
+      
+      if (tipsSection.style.display === 'none' || !tipsSection.style.display) {
+        tipsSection.style.display = 'block';
+      } else {
+        tipsSection.style.display = 'none';
+      }
+    });
+  }
+  
+  // Forecast toggle
+  const forecastToggle = document.getElementById('weather-forecast-toggle');
+  if (forecastToggle) {
+    forecastToggle.addEventListener('click', () => {
+      const forecastSection = document.getElementById('weather-forecast-section');
+      forecastToggle.classList.toggle('active');
+      
+      if (forecastSection.style.display === 'none' || !forecastSection.style.display) {
+        forecastSection.style.display = 'block';
+        // Fetch forecast if not already loaded
+        if (!document.getElementById('weather-forecast-container').innerHTML.trim()) {
+          fetch7DayForecast();
+        }
+      } else {
+        forecastSection.style.display = 'none';
+      }
+    });
+  }
+});
+
+// Initialize weather widget
+async function initializeWeather() {
+  // Check if API key is set
+  if (ACCUWEATHER_API_KEY === 'YOUR_ACCUWEATHER_API_KEY') {
+    showWeatherError('Please configure your AccuWeather API key in weather.js');
+    return;
+  }
+  
+  await fetchWeather();
+}
+
+// Fetch weather data
+async function fetchWeather() {
+  showWeatherLoading();
+  
+  try {
+    // Step 1: Get user's location
+    const position = await getUserLocation();
+    console.log('User position:', position);
+    
+    // Step 2: Get location key from AccuWeather
+    let locationKey = cachedLocationKey;
+    let locationName = cachedLocationName;
+    
+    if (!locationKey) {
+      const locationData = await getLocationKey(position.latitude, position.longitude);
+      locationKey = locationData.key;
+      locationName = locationData.name;
+      
+      // Cache location data
+      cachedLocationKey = locationKey;
+      cachedLocationName = locationName;
+    }
+    
+    console.log('Location key:', locationKey);
+    
+    // Step 3: Get current weather conditions
+    const weatherData = await getCurrentConditions(locationKey);
+    console.log('Weather data:', weatherData);
+    
+    // Display weather information
+    displayWeather(weatherData, locationName);
+    lastWeatherUpdate = new Date();
+    
+  } catch (error) {
+    console.error('Error fetching weather:', error);
+    handleWeatherError(error);
+  }
+}
+
+// Search city weather
+async function searchCityWeather(cityName) {
+  showWeatherLoading();
+  
+  try {
+    console.log('Searching for city:', cityName);
+    
+    // Search for city using AccuWeather API
+    const locationData = await searchCity(cityName);
+    
+    if (!locationData) {
+      throw new Error('City not found. Please try another city name.');
+    }
+    
+    console.log('City found:', locationData);
+    
+    // Cache the new location
+    cachedLocationKey = locationData.key;
+    cachedLocationName = locationData.name;
+    
+    // Get weather for this location
+    const weatherData = await getCurrentConditions(locationData.key);
+    console.log('Weather data:', weatherData);
+    
+    // Display weather information
+    displayWeather(weatherData, locationData.name);
+    lastWeatherUpdate = new Date();
+    
+  } catch (error) {
+    console.error('Error searching city weather:', error);
+    handleWeatherError(error);
+  }
+}
+
+// Get user's geolocation
+function getUserLocation() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Geolocation is not supported by your browser'));
+      return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        });
+      },
+      (error) => {
+        // If user denies location, use a default location (Delhi, India for agriculture context)
+        console.warn('Geolocation error, using default location:', error);
+        resolve({
+          latitude: 28.6139, // Delhi
+          longitude: 77.2090
+        });
+      },
+      {
+        enableHighAccuracy: true, // Use high accuracy for precise location
+        timeout: 15000,
+        maximumAge: 300000 // 5 minutes cache for better precision
+      }
+    );
+  });
+}
+
+// Get detailed location including village/area using reverse geocoding
+async function getDetailedLocation(latitude, longitude) {
+  try {
+    // Use OpenStreetMap Nominatim for reverse geocoding (free, no API key needed)
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`;
+    
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Smart-Agriculture-AI/1.0' // Required by Nominatim
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Reverse geocoding failed');
+    }
+    
+    const data = await response.json();
+    console.log('Detailed location data:', data);
+    
+    // Extract detailed location information
+    const address = data.address || {};
+    
+    // Build location string with priority: village > suburb > neighbourhood > town > city
+    let locationName = '';
+    
+    if (address.village) {
+      locationName = address.village;
+    } else if (address.hamlet) {
+      locationName = address.hamlet;
+    } else if (address.suburb) {
+      locationName = address.suburb;
+    } else if (address.neighbourhood) {
+      locationName = address.neighbourhood;
+    } else if (address.town) {
+      locationName = address.town;
+    } else if (address.city) {
+      locationName = address.city;
+    } else if (address.county) {
+      locationName = address.county;
+    } else if (address.state_district) {
+      locationName = address.state_district;
+    } else {
+      locationName = data.display_name.split(',')[0];
+    }
+    
+    // Add city/state for context if we have village/area
+    let fullLocation = locationName;
+    if ((address.village || address.hamlet || address.suburb || address.neighbourhood) && (address.city || address.town)) {
+      fullLocation += ', ' + (address.city || address.town);
+    } else if (address.state) {
+      fullLocation += ', ' + address.state;
+    }
+    
+    // Add country
+    if (address.country) {
+      fullLocation += ', ' + address.country;
+    }
+    
+    return {
+      shortName: locationName,
+      fullName: fullLocation,
+      address: address
+    };
+    
+  } catch (error) {
+    console.error('Error getting detailed location:', error);
+    // Return null to fall back to AccuWeather location
+    return null;
+  }
+}
+
+// Get AccuWeather location key with detailed location
+async function getLocationKey(latitude, longitude) {
+  try {
+    // First, get detailed location using reverse geocoding
+    const detailedLocation = await getDetailedLocation(latitude, longitude);
+    
+    const url = `${LOCATION_API}?apikey=${ACCUWEATHER_API_KEY}&q=${latitude},${longitude}`;
+    
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`Location API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Use detailed location if available, otherwise use AccuWeather location
+    let locationName;
+    if (detailedLocation && detailedLocation.fullName) {
+      locationName = detailedLocation.fullName;
+      console.log('Using detailed location:', locationName);
+    } else {
+      locationName = `${data.LocalizedName}, ${data.Country.LocalizedName}`;
+      console.log('Using AccuWeather location:', locationName);
+    }
+    
+    return {
+      key: data.Key,
+      name: locationName,
+      detailedLocation: detailedLocation
+    };
+  } catch (error) {
+    console.error('Error getting location key:', error);
+    throw new Error('Failed to get location information');
+  }
+}
+
+// Search city by name
+async function searchCity(cityName) {
+  try {
+    const url = `${ACCUWEATHER_BASE_URL}/locations/v1/cities/search?apikey=${ACCUWEATHER_API_KEY}&q=${encodeURIComponent(cityName)}`;
+    
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`City search error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data || data.length === 0) {
+      return null;
+    }
+    
+    // Return the first match
+    const city = data[0];
+    return {
+      key: city.Key,
+      name: `${city.LocalizedName}, ${city.Country.LocalizedName}`
+    };
+  } catch (error) {
+    console.error('Error searching city:', error);
+    throw new Error('Failed to search for city');
+  }
+}
+
+// Get current weather conditions
+async function getCurrentConditions(locationKey) {
+  try {
+    const url = `${CURRENT_CONDITIONS_API}/${locationKey}?apikey=${ACCUWEATHER_API_KEY}&details=true`;
+    
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`Weather API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data || data.length === 0) {
+      throw new Error('No weather data available');
+    }
+    
+    return data[0]; // AccuWeather returns an array with single element
+  } catch (error) {
+    console.error('Error getting current conditions:', error);
+    throw new Error('Failed to fetch weather data');
+  }
+}
+
+// Fetch 7-day forecast
+async function fetch7DayForecast() {
+  if (!cachedLocationKey) {
+    console.error('No location key available');
+    return;
+  }
+  
+  const forecastLoading = document.getElementById('weather-forecast-loading');
+  const forecastContainer = document.getElementById('weather-forecast-container');
+  
+  forecastLoading.style.display = 'flex';
+  forecastContainer.innerHTML = '';
+  
+  try {
+    const url = `${ACCUWEATHER_BASE_URL}/forecasts/v1/daily/5day/${cachedLocationKey}?apikey=${ACCUWEATHER_API_KEY}&metric=true&details=true`;
+    
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`Forecast API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data || !data.DailyForecasts) {
+      throw new Error('No forecast data available');
+    }
+    
+    // Display forecast (AccuWeather free tier gives 5 days)
+    displayForecast(data.DailyForecasts);
+    forecastLoading.style.display = 'none';
+    
+  } catch (error) {
+    console.error('Error fetching forecast:', error);
+    forecastLoading.style.display = 'none';
+    forecastContainer.innerHTML = `
+      <div style="padding: 2rem; text-align: center; color: #666; grid-column: 1 / -1;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #ff9800; margin-bottom: 0.5rem;"></i>
+        <p>Unable to load forecast. ${error.message}</p>
+      </div>
+    `;
+  }
+}
+
+// Display forecast data
+function displayForecast(dailyForecasts) {
+  const container = document.getElementById('weather-forecast-container');
+  container.innerHTML = '';
+  
+  dailyForecasts.forEach((day, index) => {
+    const date = new Date(day.Date);
+    const dayName = index === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short' });
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    
+    const maxTemp = Math.round(day.Temperature.Maximum.Value);
+    const minTemp = Math.round(day.Temperature.Minimum.Value);
+    
+    const dayIcon = getWeatherIcon(day.Day.Icon);
+    const description = day.Day.IconPhrase;
+    
+    const rainProbability = day.Day.RainProbability || day.Day.PrecipitationProbability || 0;
+    
+    const card = document.createElement('div');
+    card.className = 'forecast-day-card';
+    card.innerHTML = `
+      <div class="forecast-day-name">${dayName}</div>
+      <div class="forecast-date">${dateStr}</div>
+      <div class="forecast-icon">${dayIcon}</div>
+      <div class="forecast-temps">
+        <span class="forecast-temp-high">${maxTemp}°</span>
+        <span class="forecast-temp-low">${minTemp}°</span>
+      </div>
+      <div class="forecast-description">${description}</div>
+      ${rainProbability > 0 ? `
+        <div class="forecast-rain-chance">
+          <i class="fas fa-tint"></i>
+          ${rainProbability}%
+        </div>
+      ` : ''}
+    `;
+    
+    container.appendChild(card);
+  });
+}
+
+// Display weather information
+function displayWeather(weather, locationName) {
+  // Hide loading and error, show content
+  document.getElementById('weather-loading').style.display = 'none';
+  document.getElementById('weather-error').style.display = 'none';
+  document.getElementById('weather-content').style.display = 'block';
+  
+  // Location name
+  document.getElementById('weather-location-name').textContent = locationName;
+  
+  // Temperature (convert to Celsius if needed)
+  const tempC = weather.Temperature.Metric.Value;
+  document.getElementById('weather-temp').textContent = Math.round(tempC);
+  
+  // Weather icon
+  const weatherIcon = document.getElementById('weather-icon');
+  weatherIcon.innerHTML = getWeatherIcon(weather.WeatherIcon);
+  
+  // Weather description
+  document.getElementById('weather-description').textContent = weather.WeatherText;
+  
+  // Details - compact format
+  document.getElementById('weather-humidity').textContent = weather.RelativeHumidity + '%';
+  document.getElementById('weather-wind').textContent = Math.round(weather.Wind.Speed.Metric.Value) + ' km/h';
+  document.getElementById('weather-feels-like').textContent = Math.round(weather.RealFeelTemperature.Metric.Value) + '°C';
+  
+  // Generate agriculture tips
+  generateAgricultureTips(weather);
+  
+  // Ensure tips are hidden by default
+  document.getElementById('weather-agriculture-tips').style.display = 'none';
+  document.getElementById('weather-tips-toggle').classList.remove('active');
+  
+  // Clear forecast when location changes
+  document.getElementById('weather-forecast-container').innerHTML = '';
+  document.getElementById('weather-forecast-section').style.display = 'none';
+  document.getElementById('weather-forecast-toggle').classList.remove('active');
+  
+  // Update navbar weather widget
+  updateNavbarWeather(weather, locationName);
+}
+
+// Update navbar weather widget
+function updateNavbarWeather(weather, locationName) {
+  const navTemp = document.getElementById('nav-weather-temp');
+  const navLocation = document.getElementById('nav-weather-location');
+  const navIcon = document.getElementById('nav-weather-icon');
+  
+  if (navTemp && navLocation && navIcon) {
+    const tempC = Math.round(weather.Temperature.Metric.Value);
+    navTemp.textContent = tempC + '°';
+    
+    // Extract the most specific location (village/area/city)
+    const locationParts = locationName.split(',');
+    let shortLocation = locationParts[0].trim();
+    
+    // If we have multiple parts and first part is too long, try to be smart about it
+    if (shortLocation.length > 15 && locationParts.length > 1) {
+      // Truncate with ellipsis
+      shortLocation = shortLocation.substring(0, 12) + '...';
+    }
+    
+    navLocation.textContent = shortLocation;
+    navLocation.title = locationName; // Show full location on hover
+    
+    // Update icon (no animation)
+    navIcon.innerHTML = getWeatherIcon(weather.WeatherIcon);
+  }
+  
+  // Make navbar weather widget clickable to scroll to weather section
+  const navWeatherWidget = document.getElementById('nav-weather-widget');
+  if (navWeatherWidget) {
+    navWeatherWidget.onclick = () => {
+      document.getElementById('weather').scrollIntoView({ behavior: 'smooth' });
+      
+      // Close mobile menu if open
+      const navMenu = document.getElementById('nav-menu');
+      const mobileToggle = document.getElementById('mobile-menu-toggle');
+      const backdrop = document.getElementById('nav-backdrop');
+      
+      if (navMenu.classList.contains('active')) {
+        navMenu.classList.remove('active');
+        mobileToggle.classList.remove('active');
+        backdrop.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    };
+  }
+}
+
+// Get weather icon based on AccuWeather icon code
+function getWeatherIcon(iconCode) {
+  // AccuWeather icon codes mapping to Font Awesome icons
+  const iconMap = {
+    1: '<i class="fas fa-sun"></i>', // Sunny
+    2: '<i class="fas fa-sun"></i>', // Mostly Sunny
+    3: '<i class="fas fa-cloud-sun"></i>', // Partly Sunny
+    4: '<i class="fas fa-cloud-sun"></i>', // Intermittent Clouds
+    5: '<i class="fas fa-cloud-sun"></i>', // Hazy Sunshine
+    6: '<i class="fas fa-cloud"></i>', // Mostly Cloudy
+    7: '<i class="fas fa-cloud"></i>', // Cloudy
+    8: '<i class="fas fa-smog"></i>', // Dreary (Overcast)
+    11: '<i class="fas fa-smog"></i>', // Fog
+    12: '<i class="fas fa-cloud-showers-heavy"></i>', // Showers
+    13: '<i class="fas fa-cloud-sun-rain"></i>', // Mostly Cloudy w/ Showers
+    14: '<i class="fas fa-cloud-sun-rain"></i>', // Partly Sunny w/ Showers
+    15: '<i class="fas fa-cloud-bolt"></i>', // T-Storms
+    16: '<i class="fas fa-cloud-bolt"></i>', // Mostly Cloudy w/ T-Storms
+    17: '<i class="fas fa-cloud-bolt"></i>', // Partly Sunny w/ T-Storms
+    18: '<i class="fas fa-cloud-rain"></i>', // Rain
+    19: '<i class="fas fa-snowflake"></i>', // Flurries
+    20: '<i class="fas fa-cloud-meatball"></i>', // Mostly Cloudy w/ Flurries
+    21: '<i class="fas fa-cloud-meatball"></i>', // Partly Sunny w/ Flurries
+    22: '<i class="fas fa-snowflake"></i>', // Snow
+    23: '<i class="fas fa-cloud-meatball"></i>', // Mostly Cloudy w/ Snow
+    24: '<i class="fas fa-snowflake"></i>', // Ice
+    25: '<i class="fas fa-cloud-rain"></i>', // Sleet
+    26: '<i class="fas fa-cloud-rain"></i>', // Freezing Rain
+    29: '<i class="fas fa-cloud-rain"></i>', // Rain and Snow
+    30: '<i class="fas fa-temperature-high"></i>', // Hot
+    31: '<i class="fas fa-temperature-low"></i>', // Cold
+    32: '<i class="fas fa-wind"></i>', // Windy
+    33: '<i class="fas fa-moon"></i>', // Clear (Night)
+    34: '<i class="fas fa-moon"></i>', // Mostly Clear (Night)
+    35: '<i class="fas fa-cloud-moon"></i>', // Partly Cloudy (Night)
+    36: '<i class="fas fa-cloud-moon"></i>', // Intermittent Clouds (Night)
+    37: '<i class="fas fa-smog"></i>', // Hazy Moonlight
+    38: '<i class="fas fa-cloud"></i>', // Mostly Cloudy (Night)
+  };
+  
+  return iconMap[iconCode] || '<i class="fas fa-cloud"></i>';
+}
+
+// Generate agriculture tips based on weather
+function generateAgricultureTips(weather) {
+  const tips = [];
+  const temp = weather.Temperature.Metric.Value;
+  const humidity = weather.RelativeHumidity;
+  const windSpeed = weather.Wind.Speed.Metric.Value;
+  const hasRain = weather.HasPrecipitation;
+  
+  // Temperature-based tips
+  if (temp > 35) {
+    tips.push('🌡️ <strong>High Temperature Alert:</strong> Ensure adequate irrigation. Consider shade netting for sensitive crops. Avoid spraying pesticides during peak heat hours.');
+  } else if (temp > 30) {
+    tips.push('☀️ <strong>Warm Weather:</strong> Monitor soil moisture levels regularly. Water early morning or late evening to reduce evaporation.');
+  } else if (temp < 10) {
+    tips.push('❄️ <strong>Cold Weather:</strong> Protect sensitive crops with mulching or row covers. Be alert for frost damage.');
+  } else if (temp >= 20 && temp <= 30) {
+    tips.push('✅ <strong>Ideal Temperature:</strong> Good conditions for most crops. Perfect time for fertilizer application and pest management activities.');
+  }
+  
+  // Humidity-based tips
+  if (humidity > 80) {
+    tips.push('💧 <strong>High Humidity:</strong> Increased risk of fungal diseases. Monitor crops for signs of leaf spot, blight, or mildew. Consider prophylactic fungicide application.');
+  } else if (humidity < 30) {
+    tips.push('🌵 <strong>Low Humidity:</strong> Risk of water stress. Increase irrigation frequency. Watch for spider mite infestations.');
+  }
+  
+  // Wind-based tips
+  if (windSpeed > 30) {
+    tips.push('💨 <strong>High Winds:</strong> Avoid spraying operations. Check plant supports and stakes. Risk of mechanical damage to crops.');
+  }
+  
+  // Rain-based tips
+  if (hasRain) {
+    tips.push('🌧️ <strong>Rainy Conditions:</strong> Postpone fertilizer and pesticide applications. Ensure proper drainage in fields. Monitor for waterlogging.');
+  } else if (humidity < 50 && temp > 25) {
+    tips.push('🌱 <strong>Dry Conditions:</strong> Good time for spraying operations. Check soil moisture and irrigate if needed.');
+  }
+  
+  // General tip based on conditions
+  if (!hasRain && temp >= 15 && temp <= 30 && humidity >= 40 && humidity <= 70) {
+    tips.push('🌾 <strong>Optimal Conditions:</strong> Excellent weather for field operations, planting, and crop management activities.');
+  }
+  
+  // Display tips
+  const tipsContainer = document.getElementById('agriculture-tips-content');
+  if (tips.length > 0) {
+    tipsContainer.innerHTML = tips.map(tip => `<div class="tip-item">${tip}</div>`).join('');
+  } else {
+    tipsContainer.innerHTML = '<p>Monitor your crops regularly and follow recommended agricultural practices.</p>';
+  }
+}
+
+// Show loading state
+function showWeatherLoading() {
+  document.getElementById('weather-loading').style.display = 'flex';
+  document.getElementById('weather-error').style.display = 'none';
+  document.getElementById('weather-content').style.display = 'none';
+}
+
+// Show error state
+function showWeatherError(message) {
+  document.getElementById('weather-loading').style.display = 'none';
+  document.getElementById('weather-error').style.display = 'flex';
+  document.getElementById('weather-content').style.display = 'none';
+  document.getElementById('weather-error-message').textContent = message;
+}
+
+// Handle weather errors
+function handleWeatherError(error) {
+  let errorMessage = 'Unable to load weather data. ';
+  
+  if (error.message.includes('API key')) {
+    errorMessage = 'Please configure your AccuWeather API key.';
+  } else if (error.message.includes('Location')) {
+    errorMessage = 'Unable to determine your location. Please enable location services.';
+  } else if (error.message.includes('Network') || error.message.includes('fetch')) {
+    errorMessage = 'Network error. Please check your internet connection.';
+  } else {
+    errorMessage += error.message;
+  }
+  
+  showWeatherError(errorMessage);
+}
+
+</script>
+</body>
+</html>
+
